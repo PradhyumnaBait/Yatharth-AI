@@ -15,7 +15,6 @@ import {
   AlertCircle,
   ArrowRight,
   ChevronRight,
-  Sparkles,
 } from 'lucide-react';
 import { FieldEvent } from '@/services/types';
 

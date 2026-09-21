@@ -14,7 +14,7 @@ import {
   RotateCcw,
   Home,
   ChevronRight,
-  Sparkles,
+  Loader2,
 } from 'lucide-react';
 import { LiveAudioWaveform } from '@/components/capture/LiveAudioWaveform';
 import { ClarificationCard } from '@/components/capture/ClarificationCard';
@@ -24,6 +24,7 @@ import { matchEventText } from '@/mocks/matcher';
 import { useEventsStore } from '@/store/events';
 import { useOfflineStore } from '@/store/offline';
 import { useAuthStore } from '@/store/auth';
+import { useUiStore } from '@/store/ui';
 import { demoNow } from '@/mocks/clock';
 import { ExtractedInfo, FieldEvent } from '@/services/types';
 
@@ -70,6 +71,7 @@ function CapturePageContent() {
   const addEvent = useEventsStore((s) => s.addEvent);
   const addQueuedReport = useOfflineStore((s) => s.addQueuedReport);
   const isStoreOnline = useOfflineStore((s) => s.isOnline);
+  const isSimulatingOffline = useUiStore((s) => s.isSimulatingOffline);
 
   // State machine state
   const [state, setState] = useState<CaptureState>('idle');
@@ -245,7 +247,9 @@ function CapturePageContent() {
       ).padStart(2, '0')}:${String(now.getSeconds()).padStart(2, '0')}`;
       setSubmissionTimestamp(timeStr);
 
-      const isOnline = typeof navigator !== 'undefined' ? navigator.onLine && isStoreOnline : true;
+      const isOnline = typeof navigator !== 'undefined'
+        ? navigator.onLine && isStoreOnline && !isSimulatingOffline
+        : true;
 
       if (!isOnline) {
         // Offline: save to queue
@@ -386,7 +390,7 @@ function CapturePageContent() {
 
             {/* Type Instead Text Box if toggled */}
             {isTypeInstead && (
-              <div className="w-full space-y-2 p-3 bg-sb-white/10 rounded-2xl backdrop-blur-sm" data-testid="type-mode-container">
+              <div className="w-full space-y-2 p-3 bg-sb-white/10 rounded-2xl border border-sb-white/20" data-testid="type-mode-container">
                 <input
                   type="text"
                   data-testid="type-input-field"
@@ -477,7 +481,7 @@ function CapturePageContent() {
         {state === 'transcribing' && (
           <div className="flex flex-col items-center justify-center space-y-4 text-center animate-in fade-in">
             <div className="w-12 h-12 rounded-full bg-sb-white/10 flex items-center justify-center animate-spin text-sb-white">
-              <Sparkles className="w-6 h-6" />
+              <Loader2 className="w-6 h-6" />
             </div>
             <div className="space-y-1">
               <h3 className="text-title-3 font-bold text-sb-white">

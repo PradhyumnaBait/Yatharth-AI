@@ -10,7 +10,8 @@ export interface TabItem {
 
 export interface UnderlineTabsProps {
   tabs: TabItem[];
-  activeId: string;
+  activeId?: string;
+  activeTab?: string;
   onChange: (id: string) => void;
   className?: string;
   'data-testid'?: string;
@@ -19,10 +20,13 @@ export interface UnderlineTabsProps {
 export const UnderlineTabs: React.FC<UnderlineTabsProps> = ({
   tabs,
   activeId,
+  activeTab,
   onChange,
   className = '',
   'data-testid': testId = 'underline-tabs',
 }) => {
+  const currentActiveId = activeId ?? activeTab ?? tabs[0]?.id;
+
   return (
     <div
       data-testid={testId}
@@ -31,7 +35,7 @@ export const UnderlineTabs: React.FC<UnderlineTabsProps> = ({
     >
       <div className="flex gap-6 min-w-max px-1">
         {tabs.map((tab) => {
-          const isActive = tab.id === activeId;
+          const isActive = tab.id === currentActiveId;
           return (
             <button
               key={tab.id}

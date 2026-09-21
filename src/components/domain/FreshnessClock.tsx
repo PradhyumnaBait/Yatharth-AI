@@ -50,7 +50,7 @@ export const FreshnessClock: React.FC<FreshnessClockProps> = ({
     >
       {showIcon && <Clock className="w-3.5 h-3.5 text-sb-ink-3" strokeWidth={1.5} />}
       {prefix && <span>{prefix}</span>}
-      <span className="font-mono text-mono-m font-semibold text-sb-navy">
+      <span className="font-mono text-mono-m font-semibold text-sb-navy" aria-live="polite">
         {formatTime(seconds)}
       </span>
     </div>

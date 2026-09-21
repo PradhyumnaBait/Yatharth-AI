@@ -8,7 +8,6 @@ import {
   HelpCircle,
   AlertTriangle,
   Layers,
-  Sparkles,
   FileSpreadsheet,
   FileText,
   Calendar,

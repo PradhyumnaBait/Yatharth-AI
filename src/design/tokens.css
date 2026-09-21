@@ -98,3 +98,9 @@ body {
     scroll-behavior: auto !important;
   }
 }
+
+/* Large Text Accessibility Setting - SPEC §7.5 */
+html[data-text-size="large"] {
+  font-size: 112.5%;
+}
+

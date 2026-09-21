@@ -6,6 +6,8 @@ import { ArrowLeft, Bell, Search, MoreHorizontal } from 'lucide-react';
 import { Avatar } from '../ui/Avatar';
 import { useAuthStore } from '@/store/auth';
 
+import { useTranslation } from '@/i18n/useTranslation';
+
 export type HeaderVariant = 'home' | 'back' | 'project';
 
 export interface PageHeaderProps {
@@ -39,6 +41,7 @@ export const PageHeader: React.FC<PageHeaderProps> = ({
 }) => {
   const router = useRouter();
   const { user } = useAuthStore();
+  const { t } = useTranslation();
 
   const handleNotifications = onNotificationsClick || (() => router.push('/notifications'));
   const handleSearch = onSearchClick || (() => router.push('/search'));
@@ -66,7 +69,7 @@ export const PageHeader: React.FC<PageHeaderProps> = ({
             />
           </button>
           <div className="min-w-0">
-            <div className="text-caption text-sb-ink-3">Hello,</div>
+            <div className="text-caption text-sb-ink-3">{t('home.hello')}</div>
             <div className="text-callout font-bold text-sb-navy truncate">
               {user?.name || 'Rahul Patil'}
             </div>
@@ -179,7 +182,7 @@ export const PageHeader: React.FC<PageHeaderProps> = ({
           <ArrowLeft className="w-5 h-5" strokeWidth={2} />
         </button>
         <div className="min-w-0">
-          <h1 className="text-title-3 font-bold text-sb-navy truncate">
+          <h1 className="text-title-3 font-bold text-sb-navy truncate" data-testid={`${testId}-title`}>
             {title}
           </h1>
           {subtitle && (

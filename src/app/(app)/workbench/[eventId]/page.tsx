@@ -221,6 +221,12 @@ export default function MatchReviewPage({ params }: { params: { eventId: string 
   };
 
   // Unmatched actions
+  const handleHoldAndAsk = async () => {
+    if (!event) return;
+    await askQuestion(event.id, 'Which activity was this work performed against?', user?.name || 'Meera Nair');
+    setToastMessage('Clarification request sent to supervisor');
+  };
+
   const handleMarkUnmatched = async (actionType: 'out-of-scope' | 'duplicate' | 'ask') => {
     if (!event) return;
     if (actionType === 'ask') {
@@ -343,14 +349,24 @@ export default function MatchReviewPage({ params }: { params: { eventId: string 
 
         {/* Out-of-sequence Variant Warning Banner */}
         {isOutOfSequence && (
-          <div className="p-3.5 bg-sb-review-tint rounded-xl border border-sb-review text-sb-review-ink space-y-1.5" data-testid="out-of-sequence-banner">
+          <div className="p-3.5 bg-sb-review-tint rounded-xl border border-sb-review text-sb-review-ink space-y-2.5" data-testid="out-of-sequence-banner">
             <div className="flex items-center gap-1.5 text-caption font-bold">
               <AlertTriangle className="w-4 h-4" />
-              <span>Out-of-Sequence Warning</span>
+              <span>Out-of-Sequence Warning (Retained Logic)</span>
             </div>
             <p className="text-[12px] leading-relaxed">
-              PIP-24-017 is not complete. Approving starts PIP-24-018 out of sequence (Retained Logic). An override reason is required.
+              PIP-24-017 is not complete. Approving starts PIP-24-018 out of sequence (Retained Logic). An override reason is required to proceed, or hold and request supervisor confirmation.
             </p>
+            <div className="pt-1">
+              <button
+                type="button"
+                data-testid="hold-ask-supervisor-btn"
+                onClick={handleHoldAndAsk}
+                className="px-3 py-1.5 rounded-full bg-sb-review text-sb-white font-bold text-caption shadow-sm hover:opacity-95 active:scale-95 transition-all"
+              >
+                Hold & ask supervisor
+              </button>
+            </div>
           </div>
         )}
 

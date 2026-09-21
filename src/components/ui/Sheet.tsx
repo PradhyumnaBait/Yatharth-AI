@@ -5,8 +5,10 @@ import * as DialogPrimitive from '@radix-ui/react-dialog';
 import { motion, AnimatePresence, useDragControls, PanInfo } from 'framer-motion';
 
 export interface SheetProps {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
+  open?: boolean;
+  isOpen?: boolean;
+  onOpenChange?: (open: boolean) => void;
+  onClose?: () => void;
   title?: string;
   description?: string;
   children: React.ReactNode;
@@ -15,34 +17,47 @@ export interface SheetProps {
 
 export const Sheet: React.FC<SheetProps> = ({
   open,
+  isOpen,
   onOpenChange,
+  onClose,
   title,
   description,
   children,
   'data-testid': testId = 'bottom-sheet',
 }) => {
+  const isSheetOpen = open ?? isOpen ?? false;
+  const handleClose = React.useCallback(() => {
+    onOpenChange?.(false);
+    onClose?.();
+  }, [onOpenChange, onClose]);
+
+  const handleOpenChange = (val: boolean) => {
+    onOpenChange?.(val);
+    if (!val) onClose?.();
+  };
+
   const dragControls = useDragControls();
 
   const handleDragEnd = (_: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
     if (info.offset.y > 100 || info.velocity.y > 300) {
-      onOpenChange(false);
+      handleClose();
     }
   };
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape' && open) {
-        onOpenChange(false);
+      if (e.key === 'Escape' && isSheetOpen) {
+        handleClose();
       }
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [open, onOpenChange]);
+  }, [isSheetOpen, handleClose]);
 
   return (
-    <DialogPrimitive.Root open={open} onOpenChange={onOpenChange}>
+    <DialogPrimitive.Root open={isSheetOpen} onOpenChange={handleOpenChange}>
       <AnimatePresence>
-        {open && (
+        {isSheetOpen && (
           <DialogPrimitive.Portal forceMount>
             {/* Scrim */}
             <DialogPrimitive.Overlay asChild>

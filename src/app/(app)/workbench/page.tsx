@@ -23,6 +23,7 @@ import {
   X,
 } from 'lucide-react';
 import { FieldEvent } from '@/services/types';
+import { MatchReviewPanel } from '@/components/domain/MatchReviewPanel';
 
 type QueueTab = 'review' | 'unmatched' | 'warnings' | 'done';
 type SortOption = 'priority' | 'confidence-asc' | 'newest' | 'discipline';
@@ -53,6 +54,11 @@ function WorkbenchContent() {
   const [batchDiffSheetOpen, setBatchDiffSheetOpen] = useState(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [undoEventId, setUndoEventId] = useState<string | null>(null);
+
+  // Desktop Dual-Pane selected event
+  const [selectedEventId, setSelectedEventId] = useState<string>(
+    searchParams.get('eventId') || 'E-2091'
+  );
 
   // Group events by tab
   const reviewEvents = useMemo(() => {
@@ -182,11 +188,13 @@ function WorkbenchContent() {
   };
 
   return (
-    <div className="flex flex-col min-h-full bg-sb-bg pb-28" data-testid="workbench-queue-pl2">
-      {/* 1. Header with Freshness */}
-      <PageHeader
-        variant="back"
-        title="Workbench"
+    <div className="flex-1 flex flex-col lg:flex-row h-full overflow-hidden bg-sb-bg" data-testid="workbench-queue-pl2">
+      {/* Left Pane: Queue */}
+      <div className="w-full lg:w-[420px] lg:border-r lg:border-sb-border flex flex-col h-full overflow-y-auto pb-28 lg:pb-6 shrink-0">
+        {/* 1. Header with Freshness */}
+        <PageHeader
+          variant="back"
+          title="Workbench"
         subtitle={
           <div className="flex items-center gap-1.5 text-caption text-sb-ink-2 font-mono">
             <span>Data Freshness</span>
@@ -298,6 +306,7 @@ function WorkbenchContent() {
           currentEvents.map((evt) => {
             const isEligible = evt.logicCheckStatus === 'Passed';
             const isSelected = selectedIds.includes(evt.id);
+            const isCurrentSelected = selectedEventId === evt.id;
 
             return (
               <div
@@ -307,12 +316,17 @@ function WorkbenchContent() {
                   if (isSelectMode) {
                     toggleSelect(evt.id, isEligible);
                   } else {
-                    router.push(`/workbench/${evt.id}`);
+                    setSelectedEventId(evt.id);
+                    if (typeof window !== 'undefined' && window.innerWidth < 1024) {
+                      router.push(`/workbench/${evt.id}`);
+                    }
                   }
                 }}
                 className={`bg-sb-white rounded-xl p-3.5 border transition-all cursor-pointer shadow-sm relative group ${
                   isSelected
                     ? 'border-sb-navy bg-sb-navy-tint/20'
+                    : isCurrentSelected
+                    ? 'border-sb-navy ring-1 ring-sb-navy bg-sb-navy-tint/10'
                     : 'border-sb-border hover:border-sb-navy/40'
                 }`}
               >
@@ -403,6 +417,25 @@ function WorkbenchContent() {
               </div>
             );
           })
+        )}
+      </div>
+      </div>
+
+      {/* Right Pane: Match Review on desktop */}
+      <div
+        data-testid="workbench-dual-pane-review"
+        className="hidden lg:flex flex-1 flex-col h-full overflow-y-auto bg-sb-bg pb-6"
+      >
+        {selectedEventId ? (
+          <MatchReviewPanel
+            eventId={selectedEventId}
+            onSelectEventId={setSelectedEventId}
+            isTwoPane={true}
+          />
+        ) : (
+          <div className="flex-1 flex items-center justify-center p-8 text-caption text-sb-text-subtle">
+            Select an event from the queue to review
+          </div>
         )}
       </div>
 

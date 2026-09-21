@@ -15,7 +15,6 @@ import {
   ChevronRight,
   CheckSquare,
   Square,
-  Sparkles,
   ExternalLink,
 } from 'lucide-react';
 

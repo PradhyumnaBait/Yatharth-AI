@@ -15,9 +15,11 @@ import {
   ChevronRight,
   Info,
 } from 'lucide-react';
+import { useTranslation } from '@/i18n/useTranslation';
 
 export default function NotificationsPage() {
   const router = useRouter();
+  const { t } = useTranslation();
   const notifications = useNotificationsStore((s) => s.notifications);
   const markAsRead = useNotificationsStore((s) => s.markAsRead);
   const markAllAsRead = useNotificationsStore((s) => s.markAllAsRead);
@@ -29,8 +31,8 @@ export default function NotificationsPage() {
   }, [notifications]);
 
   const tabs: TabItem[] = [
-    { id: 'all', label: 'All', count: notifications.filter((n) => !n.read).length || undefined },
-    { id: 'needs-action', label: 'Needs action', count: needsActionCount || undefined },
+    { id: 'all', label: t('notifications.all'), count: notifications.filter((n) => !n.read).length || undefined },
+    { id: 'needs-action', label: t('notifications.needs_action'), count: needsActionCount || undefined },
   ];
 
   const filteredNotifications = useMemo(() => {
@@ -67,7 +69,7 @@ export default function NotificationsPage() {
       {/* 1. Header */}
       <PageHeader
         variant="back"
-        title="Notifications"
+        title={t('notifications.title')}
         subtitle="Action items & alerts"
         rightAction={
           <button
@@ -77,7 +79,7 @@ export default function NotificationsPage() {
             className="text-caption font-semibold text-sb-navy hover:underline flex items-center gap-1 mr-1"
           >
             <CheckCheck className="w-4 h-4" />
-            <span>Mark all read</span>
+            <span>{t('notifications.mark_all_read')}</span>
           </button>
         }
       />

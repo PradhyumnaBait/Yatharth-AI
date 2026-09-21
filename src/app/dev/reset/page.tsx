@@ -43,6 +43,7 @@ export default function DevResetPage() {
       <div className="space-y-3 mb-6">
         <button
           type="button"
+          data-testid="reset-snapshot-reference"
           onClick={() => handleReset('reference')}
           disabled={resetting}
           className={`w-full p-4 rounded-[16px] bg-sb-white border text-left transition-all active:scale-[0.99] ${
@@ -57,6 +58,7 @@ export default function DevResetPage() {
 
         <button
           type="button"
+          data-testid="reset-snapshot-demo-start"
           onClick={() => handleReset('demo-start')}
           disabled={resetting}
           className={`w-full p-4 rounded-[16px] bg-sb-white border text-left transition-all active:scale-[0.99] ${

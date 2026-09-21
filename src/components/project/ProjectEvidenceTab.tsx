@@ -13,7 +13,6 @@ import {
   LayoutList,
   LayoutGrid,
   ChevronRight,
-  Sparkles,
 } from 'lucide-react';
 import { FieldEvent } from '@/services/types';
 

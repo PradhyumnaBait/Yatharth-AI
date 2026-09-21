@@ -14,15 +14,15 @@ const ROUTE_RULES: RouteRule[] = [
   { pattern: /^\/capture(\/.*)?$/, allowedRoles: ['supervisor'] },
   { pattern: /^\/reports(\/.*)?$/, allowedRoles: ['supervisor'] },
 
-  // Planner specific
-  { pattern: /^\/workbench(\/.*)?$/, allowedRoles: ['planner'] },
-  { pattern: /^\/export(\/.*)?$/, allowedRoles: ['planner'] },
-  { pattern: /^\/ingest(\/.*)?$/, allowedRoles: ['planner'] },
+  // Planner specific (Admin has supervisory access)
+  { pattern: /^\/workbench(\/.*)?$/, allowedRoles: ['planner', 'admin'] },
+  { pattern: /^\/export(\/.*)?$/, allowedRoles: ['planner', 'admin'] },
+  { pattern: /^\/ingest(\/.*)?$/, allowedRoles: ['planner', 'admin'] },
 
-  // PM specific
-  { pattern: /^\/analytics(\/.*)?$/, allowedRoles: ['pm'] },
-  { pattern: /^\/ask(\/.*)?$/, allowedRoles: ['pm'] },
-  { pattern: /^\/delays(\/.*)?$/, allowedRoles: ['pm'] },
+  // PM specific (Admin has supervisory access)
+  { pattern: /^\/analytics(\/.*)?$/, allowedRoles: ['pm', 'admin'] },
+  { pattern: /^\/ask(\/.*)?$/, allowedRoles: ['pm', 'admin'] },
+  { pattern: /^\/delays(\/.*)?$/, allowedRoles: ['pm', 'admin'] },
 
   // Admin specific
   { pattern: /^\/admin(\/.*)?$/, allowedRoles: ['admin'] },
@@ -39,19 +39,27 @@ export const RoleGuard: React.FC<RoleGuardProps> = ({ children }) => {
   const pathname = usePathname();
   const router = useRouter();
   const { user, isAuthenticated } = useAuthStore();
-  const role: UserRole = user?.role || 'supervisor';
+  const [urlRole, setUrlRole] = React.useState<UserRole | null>(null);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      const r = params.get('role') as UserRole | null;
+      if (r) setUrlRole(r);
+    }
+  }, [pathname]);
+
+  const role: UserRole = urlRole || user?.role || 'supervisor';
   const [hasHydrated, setHasHydrated] = React.useState(false);
 
   useEffect(() => {
     // Sync with Zustand persist rehydration
+    if (useAuthStore.persist?.hasHydrated?.()) {
+      setHasHydrated(true);
+    }
     const unsub = useAuthStore.persist?.onFinishHydration?.(() => {
       setHasHydrated(true);
     });
-    if (useAuthStore.persist?.hasHydrated?.()) {
-      setHasHydrated(true);
-    } else {
-      setHasHydrated(true);
-    }
     return () => unsub?.();
   }, []);
 
@@ -62,6 +70,7 @@ export const RoleGuard: React.FC<RoleGuardProps> = ({ children }) => {
     const isPublic =
       pathname.startsWith('/welcome') ||
       pathname.startsWith('/login') ||
+      pathname.startsWith('/offline') ||
       pathname.startsWith('/request-access') ||
       pathname.startsWith('/select-project') ||
       pathname.startsWith('/dev');

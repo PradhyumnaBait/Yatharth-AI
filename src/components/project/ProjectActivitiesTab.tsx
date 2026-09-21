@@ -14,7 +14,7 @@ import {
   ChevronRight,
   Flame,
   PlusCircle,
-  Sparkles,
+  Cpu,
 } from 'lucide-react';
 import { Activity } from '@/services/types';
 
@@ -154,7 +154,7 @@ export const ProjectActivitiesTab: React.FC<ProjectActivitiesTabProps> = ({
               onClick={() => router.push('/workbench/E-2091')}
               className="w-full py-3 px-4 rounded-full bg-sb-navy text-sb-white font-semibold text-callout flex items-center justify-center gap-2 hover:bg-sb-navy-pressed active:scale-[0.99] transition-all shadow-e1"
             >
-              <Sparkles className="w-4 h-4" />
+              <Cpu className="w-4 h-4" />
               <span>Open Planner Workbench (P10)</span>
               <ExternalLink className="w-4 h-4 ml-1" />
             </button>

@@ -11,6 +11,7 @@ import { Button } from '@/components/ui/Button';
 import { useEventsStore } from '@/store/events';
 import { useProjectStore, useActiveProject } from '@/store/project';
 import { useActivitiesStore, useActiveActivitiesCount } from '@/store/activities';
+import { useTranslation } from '@/i18n/useTranslation';
 
 export type SupervisorPill = 'all' | 'progress' | 'tasks' | 'evidence';
 
@@ -20,6 +21,7 @@ interface SupervisorHomeProps {
 
 export const SupervisorHome: React.FC<SupervisorHomeProps> = ({ activePill }) => {
   const router = useRouter();
+  const { t } = useTranslation();
   const project = useActiveProject();
   const phases = useProjectStore((state) => state.phases);
   const events = useEventsStore((state) => state.events);
@@ -192,14 +194,14 @@ export const SupervisorHome: React.FC<SupervisorHomeProps> = ({ activePill }) =>
       {/* Active Project Section */}
       <section className="px-4">
         <div className="flex items-center justify-between mb-2">
-          <h2 className="text-title-3 font-bold text-sb-navy">Active Project</h2>
+          <h2 className="text-title-3 font-bold text-sb-navy">{t('home.activeProject')}</h2>
           <button
             type="button"
             data-testid="see-all-projects-btn"
             onClick={() => router.push('/select-project')}
             className="text-caption font-semibold text-sb-navy hover:underline"
           >
-            See All
+            {t('home.seeAll')}
           </button>
         </div>
 
@@ -209,7 +211,7 @@ export const SupervisorHome: React.FC<SupervisorHomeProps> = ({ activePill }) =>
           plannedProgress={project?.plannedProgress ?? 74}
           dataDate={project?.dataDate || '20 Sep 2026'}
           activeActivitiesCount={activeActivitiesCount || 14}
-          imageSrc="/images/refinery-pipes.jpg"
+          imageSrc="/images/pipeline-trench.jpg"
           onClick={() => router.push(`/project/${project?.id || 'kandla-panipat-p3'}`)}
         />
       </section>
@@ -217,14 +219,14 @@ export const SupervisorHome: React.FC<SupervisorHomeProps> = ({ activePill }) =>
       {/* Today's Events Section */}
       <section className="px-4">
         <div className="flex items-center justify-between mb-2">
-          <h2 className="text-title-3 font-bold text-sb-navy">Today&apos;s Events</h2>
+          <h2 className="text-title-3 font-bold text-sb-navy">{t('home.todaysEvents')}</h2>
           <button
             type="button"
             data-testid="see-all-events-btn"
             onClick={() => router.push('/reports?tab=Today')}
             className="text-caption font-semibold text-sb-navy hover:underline"
           >
-            See All
+            {t('home.seeAll')}
           </button>
         </div>
 

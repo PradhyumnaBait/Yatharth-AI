@@ -43,6 +43,8 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({
           src={imageSrc}
           alt={title}
           fill
+          priority
+          unoptimized
           sizes="(max-width: 450px) 100vw, 400px"
           className="object-cover"
         />

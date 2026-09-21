@@ -15,7 +15,7 @@ import {
   Pause,
   Mic,
   MessageSquare,
-  Sparkles,
+  Cpu,
   ExternalLink,
   ShieldCheck,
   Send,
@@ -244,7 +244,7 @@ export default function EventDetailPage({ params }: { params: { id: string } }) 
         <div className="bg-sb-white rounded-2xl p-4 border border-sb-border shadow-e1 space-y-3" data-testid="event-match-card">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-1.5">
-              <Sparkles className="w-4 h-4 text-sb-navy" />
+              <Cpu className="w-4 h-4 text-sb-navy" />
               <h3 className="text-callout font-bold text-sb-navy">
                 AI Schedule Match
               </h3>

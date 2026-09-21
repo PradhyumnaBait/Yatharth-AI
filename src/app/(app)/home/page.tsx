@@ -38,10 +38,12 @@ import {
 } from '@/store/events';
 import { useProjectStore, useActiveProject, useSPI } from '@/store/project';
 import { useAuthStore, UserRole } from '@/store/auth';
+import { useTranslation } from '@/i18n/useTranslation';
 
 function HomePageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const { t } = useTranslation();
 
   const { user } = useAuthStore();
   const roleParam = searchParams.get('role') as UserRole | null;
@@ -92,36 +94,36 @@ function HomePageContent() {
     { id: string; label: string; icon: React.ReactNode }[]
   > = {
     supervisor: [
-      { id: 'all', label: 'All', icon: <LayoutGrid className="w-4 h-4" /> },
-      { id: 'progress', label: 'Progress', icon: <TrendingUp className="w-4 h-4" /> },
-      { id: 'tasks', label: 'Tasks', icon: <CheckSquare className="w-4 h-4" /> },
-      { id: 'evidence', label: 'Evidence', icon: <Camera className="w-4 h-4" /> },
+      { id: 'all', label: t('home.all'), icon: <LayoutGrid className="w-4 h-4" /> },
+      { id: 'progress', label: t('home.progress'), icon: <TrendingUp className="w-4 h-4" /> },
+      { id: 'tasks', label: t('home.tasks'), icon: <CheckSquare className="w-4 h-4" /> },
+      { id: 'evidence', label: t('home.evidence'), icon: <Camera className="w-4 h-4" /> },
     ],
     planner: [
-      { id: 'all', label: 'All', icon: <LayoutGrid className="w-4 h-4" /> },
-      { id: 'queue', label: 'Queue', icon: <Clock className="w-4 h-4" /> },
-      { id: 'alerts', label: 'Alerts', icon: <AlertTriangle className="w-4 h-4" /> },
-      { id: 'imports', label: 'Imports', icon: <FileSpreadsheet className="w-4 h-4" /> },
+      { id: 'all', label: t('home.all'), icon: <LayoutGrid className="w-4 h-4" /> },
+      { id: 'queue', label: t('home.queue'), icon: <Clock className="w-4 h-4" /> },
+      { id: 'alerts', label: t('home.alerts'), icon: <AlertTriangle className="w-4 h-4" /> },
+      { id: 'imports', label: t('home.imports'), icon: <FileSpreadsheet className="w-4 h-4" /> },
     ],
     pm: [
-      { id: 'all', label: 'All', icon: <LayoutGrid className="w-4 h-4" /> },
-      { id: 'progress', label: 'Progress', icon: <TrendingUp className="w-4 h-4" /> },
-      { id: 'delays', label: 'Delays', icon: <AlertTriangle className="w-4 h-4" /> },
-      { id: 'memory', label: 'Memory', icon: <Brain className="w-4 h-4" /> },
+      { id: 'all', label: t('home.all'), icon: <LayoutGrid className="w-4 h-4" /> },
+      { id: 'progress', label: t('home.progress'), icon: <TrendingUp className="w-4 h-4" /> },
+      { id: 'delays', label: t('home.delays'), icon: <AlertTriangle className="w-4 h-4" /> },
+      { id: 'memory', label: t('home.memory'), icon: <Brain className="w-4 h-4" /> },
     ],
     admin: [
-      { id: 'all', label: 'All', icon: <LayoutGrid className="w-4 h-4" /> },
-      { id: 'users', label: 'Users', icon: <Users className="w-4 h-4" /> },
-      { id: 'requests', label: 'Requests', icon: <Inbox className="w-4 h-4" /> },
-      { id: 'projects', label: 'Projects', icon: <Layers className="w-4 h-4" /> },
+      { id: 'all', label: t('home.all'), icon: <LayoutGrid className="w-4 h-4" /> },
+      { id: 'users', label: t('home.users'), icon: <Users className="w-4 h-4" /> },
+      { id: 'requests', label: t('home.requests'), icon: <Inbox className="w-4 h-4" /> },
+      { id: 'projects', label: t('home.projects'), icon: <Layers className="w-4 h-4" /> },
     ],
   };
 
   const currentPills = pillsByRole[role];
 
   return (
-    <div data-testid={`home-screen-${role}`} className="flex flex-col min-h-screen bg-sb-bg pb-24 select-none">
-      {/* 1. Header Row (Avatar + Greeting + Project Switcher + Bell with unread dot) */}
+    <div className="flex flex-col min-h-full pb-8 bg-sb-bg" data-testid={`home-screen-${role}`}>
+      {/* 1. Page Header (Home Variant) with Avatar & Live Project Switcher */}
       <PageHeader
         variant="home"
         projectName={project?.name || 'Kandla–Panipat Pipeline — Package 3'}
@@ -164,7 +166,7 @@ function HomePageContent() {
       <section className="px-4 pb-4">
         {/* Scope Label */}
         <div className="text-[11px] font-medium text-sb-ink-3 mb-1.5 px-0.5">
-          {role === 'supervisor' && 'Today, all crews'}
+          {role === 'supervisor' && t('home.todayScope')}
           {role === 'planner' && 'Live triage queue'}
           {role === 'pm' && 'Current baseline package'}
           {role === 'admin' && 'Organization & system scope'}
@@ -177,7 +179,7 @@ function HomePageContent() {
               {/* 47 Verified */}
               <KpiTile
                 number={formatKpi(verifiedCount)}
-                label="Verified"
+                label={t('common.verified')}
                 statusColor="verified"
                 icon={<CheckCircle2 className="w-3.5 h-3.5 text-sb-verified" />}
                 onClick={() => router.push('/reports?filter=Verified')}
@@ -187,7 +189,7 @@ function HomePageContent() {
               {/* 12 Review */}
               <KpiTile
                 number={formatKpi(reviewCount)}
-                label="Review"
+                label={t('common.review')}
                 statusColor="review"
                 icon={<Clock className="w-3.5 h-3.5 text-sb-review" />}
                 onClick={() => router.push('/reports?filter=Review')}
@@ -197,7 +199,7 @@ function HomePageContent() {
               {/* 03 Delays */}
               <KpiTile
                 number={formatKpi(delayCount)}
-                label="Delays"
+                label={t('common.delays')}
                 statusColor="critical"
                 icon={<AlertTriangle className="w-3.5 h-3.5 text-sb-critical" />}
                 onClick={() => router.push('/reports?filter=Delay')}

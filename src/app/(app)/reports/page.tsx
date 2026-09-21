@@ -27,11 +27,13 @@ import {
   Clock,
 } from 'lucide-react';
 import { FieldEvent } from '@/services/types';
+import { useTranslation } from '@/i18n/useTranslation';
 
 type ReportTab = 'today' | 'drafts' | 'queued' | 'history';
 
 function ReportsPageContent() {
   const router = useRouter();
+  const { t } = useTranslation();
   const searchParams = useSearchParams();
   const tabParam = (searchParams.get('tab') || 'today').toLowerCase() as ReportTab;
   const initialTab = ['today', 'drafts', 'queued', 'history'].includes(tabParam) ? tabParam : 'today';
@@ -57,10 +59,10 @@ function ReportsPageContent() {
 
   // Tab items with dynamic counts
   const reportTabs: TabItem[] = [
-    { id: 'today', label: 'Today', count: events.filter((e) => e.status === 'Verified' || e.status === 'Review').length },
-    { id: 'drafts', label: 'Drafts' },
-    { id: 'queued', label: 'Queued', count: queuedReports.length > 0 ? queuedReports.length : undefined },
-    { id: 'history', label: 'History' },
+    { id: 'today', label: t('reports.today'), count: events.filter((e) => e.status === 'Verified' || e.status === 'Review').length },
+    { id: 'drafts', label: t('reports.drafts') },
+    { id: 'queued', label: t('reports.queued'), count: queuedReports.length > 0 ? queuedReports.length : undefined },
+    { id: 'history', label: t('reports.history') },
   ];
 
   // Filtered events
@@ -121,14 +123,14 @@ function ReportsPageContent() {
       {/* 1. Header */}
       <PageHeader
         variant="back"
-        title="Field Reports"
+        title={t('reports.title')}
         subtitle="Supervisor Execution Log"
         rightAction={
           <button
             type="button"
             data-testid="reports-filter-btn"
             onClick={() => setFilterSheetOpen(true)}
-            aria-label="Filter reports"
+            aria-label={t('reports.filter')}
             className="w-10 h-10 rounded-full flex items-center justify-center text-sb-ink hover:bg-sb-navy-tint transition-colors"
           >
             <Filter className="w-5 h-5" />

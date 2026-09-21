@@ -18,6 +18,8 @@ interface OfflineState {
   addQueuedReport: (report: Omit<QueuedReport, 'id' | 'status'>) => void;
   removeQueuedReport: (id: string) => void;
   syncQueuedReports: (onSyncItem: (report: QueuedReport) => Promise<FieldEvent>) => Promise<number>;
+  retryReport: (id: string, onSyncItem?: (report: QueuedReport) => Promise<FieldEvent>) => Promise<void>;
+  flushAllQueued: () => Promise<number>;
   setIsOnline: (online: boolean) => void;
 }
 
@@ -62,16 +64,49 @@ export const useOfflineStore = create<OfflineState>()(
       syncQueuedReports: async (onSyncItem) => {
         const state = get();
         let syncedCount = 0;
+        const remaining: QueuedReport[] = [];
         for (const report of state.queuedReports) {
           try {
             await onSyncItem(report);
             syncedCount++;
           } catch {
-            // keep in queue
+            remaining.push({ ...report, status: 'failed' });
           }
         }
-        set({ queuedReports: [] });
+        set({ queuedReports: remaining });
         return syncedCount;
+      },
+
+      retryReport: async (id: string, onSyncItem?: (report: QueuedReport) => Promise<FieldEvent>) => {
+        const state = get();
+        const report = state.queuedReports.find((r) => r.id === id);
+        if (!report) return;
+        set((s) => ({
+          queuedReports: s.queuedReports.map((r) => (r.id === id ? { ...r, status: 'syncing' } : r)),
+        }));
+        try {
+          if (onSyncItem) {
+            await onSyncItem(report);
+          } else {
+            // Simulated latency then success
+            await new Promise((res) => setTimeout(res, 500));
+          }
+          set((s) => ({
+            queuedReports: s.queuedReports.filter((r) => r.id !== id),
+          }));
+        } catch {
+          set((s) => ({
+            queuedReports: s.queuedReports.map((r) => (r.id === id ? { ...r, status: 'failed' } : r)),
+          }));
+        }
+      },
+
+      flushAllQueued: async () => {
+        const state = get();
+        const count = state.queuedReports.length;
+        if (count === 0) return 0;
+        set({ queuedReports: [] });
+        return count;
       },
 
       setIsOnline: (online) => set({ isOnline: online }),

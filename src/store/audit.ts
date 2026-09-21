@@ -64,7 +64,7 @@ export const useAuditStore = create<AuditState>()(
           ...copy[index],
           newValue: 'TAMPERED_VALUE',
         };
-        set({ chain: copy });
+        set({ chain: copy, verifyResult: null });
       },
 
       resetAudit: (initialChain: AuditEntry[]) => {
