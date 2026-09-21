@@ -1,0 +1,100 @@
+:root {
+  /* Color Tokens - SPEC §4.1 */
+  --sb-navy: #14213D;
+  --sb-navy-pressed: #0D162B;
+  --sb-navy-tint: #E8ECF3;
+  --sb-white: #FFFFFF;
+  --sb-bg: #F4F6F8;
+  --sb-border: #E7EBF0;
+  --sb-ink: #14213D;
+  --sb-ink-2: #4A5468;
+  --sb-ink-3: #6B7485;
+
+  /* Status Colors */
+  --sb-verified: #34C759;
+  --sb-verified-ink: #1B7F3B;
+  --sb-verified-tint: #E8F8ED;
+
+  --sb-review: #FFB020;
+  --sb-review-ink: #8A5300;
+  --sb-review-tint: #FFF4DC;
+
+  --sb-critical: #FF453A;
+  --sb-critical-ink: #C42B21;
+  --sb-critical-tint: #FFECEA;
+
+  /* Photo Flat Scrim */
+  --sb-scrim: rgba(20, 33, 61, 0.28);
+
+  /* Spacing Scale - 4-pt grid (SPEC §4.3) */
+  --sb-space-1: 4px;
+  --sb-space-2: 8px;
+  --sb-space-3: 12px;
+  --sb-space-3-5: 14px;
+  --sb-space-4: 16px;
+  --sb-space-5: 20px;
+  --sb-space-6: 24px;
+  --sb-space-7: 28px;
+  --sb-space-8: 32px;
+
+  /* Radii Tokens - SPEC §4.3 */
+  --sb-radius-sheet: 28px;
+  --sb-radius-card: 20px;
+  --sb-radius-tile: 16px;
+  --sb-radius-thumb: 12px;
+  --sb-radius-pill: 9999px;
+
+  /* Shadows - Elevation Levels (SPEC §4.3, No gradients) */
+  --sb-shadow-e1: 0 1px 2px rgba(20, 33, 61, 0.04);
+  --sb-shadow-e2: 0 6px 20px rgba(20, 33, 61, 0.06);
+  --sb-shadow-e3: 0 10px 30px rgba(20, 33, 61, 0.14);
+
+  /* Typography Stacks - SPEC §4.2 */
+  --font-ui: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", var(--font-inter), system-ui, sans-serif;
+  --font-mono: "SF Mono", ui-monospace, var(--font-jetbrains-mono), Menlo, monospace;
+  --font-hero-num: var(--font-ui);
+}
+
+/* Global Tabular Figures */
+* {
+  font-variant-numeric: tabular-nums lining-nums;
+}
+
+/* Base Body Styles */
+body {
+  background-color: var(--sb-bg);
+  color: var(--sb-ink);
+  font-family: var(--font-ui);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Accessible Focus-Visible Ring (2px navy, 2px white offset) */
+:focus-visible {
+  outline: 2px solid var(--sb-navy);
+  outline-offset: 2px;
+}
+
+/* Safe Area Insets */
+.pt-safe {
+  padding-top: env(safe-area-inset-top, 0px);
+}
+.pb-safe {
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+.pl-safe {
+  padding-left: env(safe-area-inset-left, 0px);
+}
+.pr-safe {
+  padding-right: env(safe-area-inset-right, 0px);
+}
+
+/* Reduced Motion Handling - SPEC §4.6 */
+@media (prefers-reduced-motion: reduce) {
+  *, ::before, ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 120ms !important;
+    scroll-behavior: auto !important;
+  }
+}

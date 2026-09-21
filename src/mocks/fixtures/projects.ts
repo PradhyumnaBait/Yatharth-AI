@@ -1,0 +1,40 @@
+import { Project } from '@/services/types';
+
+export const FIXTURE_PROJECTS: Project[] = [
+  {
+    id: 'kandla-panipat-p3',
+    name: 'Kandla–Panipat Pipeline — Package 3',
+    description: '10 km execution package · KP 178.0–188.0',
+    dataDate: '20 Sep 2026',
+    physicalProgress: 68,
+    plannedProgress: 74,
+    activeActivitiesCount: 14,
+    totalActivitiesCount: 200,
+    baselineVersion: 'P6 XER v3',
+    isPopulated: true,
+  },
+  {
+    id: 'duliajan-upgrade',
+    name: 'Duliajan Gathering Station Upgrade',
+    description: 'Gas separation and compression train modernization',
+    dataDate: '19 Sep 2026',
+    physicalProgress: 41,
+    plannedProgress: 52,
+    activeActivitiesCount: 8,
+    totalActivitiesCount: 110,
+    baselineVersion: 'P6 XER v2',
+    isPopulated: false,
+  },
+  {
+    id: 'numaligarh-tank-farm',
+    name: 'Numaligarh Tank Farm Expansion',
+    description: '6 × 50,000 m³ crude floating-roof storage tanks',
+    dataDate: '18 Sep 2026',
+    physicalProgress: 23,
+    plannedProgress: 30,
+    activeActivitiesCount: 5,
+    totalActivitiesCount: 85,
+    baselineVersion: 'P6 XER v1',
+    isPopulated: false,
+  },
+];

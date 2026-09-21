@@ -1,0 +1,10 @@
+ERMHDR	7.0	2026-09-20	XER	PROJECT
+%T	PROJECT
+%F	proj_id	proj_short_name
+1	KANDLA-PANIPAT-P3
+%T	TASK
+%F	task_id	task_code	task_name
+1	PIP-24-016	Install Pipe Line 24-XX
+2	PIP-24-017	Weld Piping System 24-XX
+3	PIP-24-018	NDT & Coating Line 24-XX
+%E

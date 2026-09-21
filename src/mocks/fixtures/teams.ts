@@ -1,0 +1,48 @@
+import { CrewTeam } from '@/services/types';
+
+export const FIXTURE_TEAMS: CrewTeam[] = [
+  {
+    id: 'crew-piping-a',
+    name: 'Piping Crew A',
+    foreman: 'Suresh Yadav',
+    contractor: 'Sterling Infra EPC',
+    headcount: 18,
+    reportsToday: 3,
+    lastReportTime: '11:15 AM',
+    verifiedRate: 95,
+    phone: '+91 98201 11001',
+  },
+  {
+    id: 'crew-welding-b',
+    name: 'Welding Crew B',
+    foreman: 'Imran Sheikh',
+    contractor: 'Rathi Welding Contractors',
+    headcount: 14,
+    reportsToday: 4,
+    lastReportTime: '10:05 AM',
+    verifiedRate: 92,
+    phone: '+91 98201 22002',
+  },
+  {
+    id: 'crew-civil',
+    name: 'Civil Crew',
+    foreman: 'Dinesh Rathod',
+    contractor: 'Sterling Infra EPC',
+    headcount: 26,
+    reportsToday: 5,
+    lastReportTime: '11:45 AM',
+    verifiedRate: 96,
+    phone: '+91 98201 33003',
+  },
+  {
+    id: 'crew-ndt',
+    name: 'NDT & Coating',
+    foreman: "Joseph D'Souza",
+    contractor: 'Sterling Infra EPC',
+    headcount: 9,
+    reportsToday: 2,
+    lastReportTime: '07:30 AM',
+    verifiedRate: 88,
+    phone: '+91 98201 44004',
+  },
+];
