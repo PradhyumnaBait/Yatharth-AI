@@ -41,30 +41,31 @@ export default function WelcomePage() {
   return (
     <div
       data-testid="welcome-screen-a1"
-      className="relative w-full h-full min-h-[844px] max-w-[390px] mx-auto bg-sb-navy overflow-hidden flex flex-col justify-between select-none"
+      className="relative w-full min-h-screen max-w-[420px] mx-auto bg-sb-navy overflow-y-auto flex flex-col justify-between select-none shadow-2xl"
     >
-      {/* Top 62% Hero Photo with flat scrim */}
-      <div className="relative w-full h-[62%] min-h-[480px] shrink-0 overflow-hidden">
+      {/* Hero Photo with clean contrast scrim */}
+      <div className="relative w-full h-[400px] sm:h-[440px] shrink-0 overflow-hidden">
         <Image
-          src="/images/hero-worker.jpg"
+          src="/images/hero-worker-v2.jpg"
           alt="SchedBridge AI field execution"
           fill
           priority
-          sizes="(max-width: 500px) 100vw, 390px"
-          className="object-cover object-center"
+          unoptimized
+          sizes="(max-width: 500px) 100vw, 420px"
+          className="object-cover object-top"
         />
 
-        {/* Flat photo scrim only - NO gradients per SPEC §1 and §4.1 */}
+        {/* Scrim for text readability over sky */}
         <div
-          className="absolute inset-0 bg-[#14213D]/28"
+          className="absolute inset-0 bg-gradient-to-b from-[#0D162B]/55 via-black/10 to-[#0D162B]/40"
           aria-hidden="true"
         />
 
-        {/* Thin overlay headline top-left */}
-        <div className="absolute top-12 left-6 right-6 z-10">
+        {/* Clean overlay headline top-left */}
+        <div className="absolute top-10 left-6 right-6 z-10">
           <h1
             data-testid="welcome-overlay-headline"
-            className="text-display-thin font-light text-white tracking-tight leading-[38px]"
+            className="text-display-thin font-light text-white tracking-tight leading-[38px] drop-shadow-sm"
           >
             {t.overlay1}
             <br />
@@ -92,10 +93,10 @@ export default function WelcomePage() {
       {/* Overlapping white sheet - overlaps photo lower edge */}
       <motion.div
         animate={{
-          y: isExpanded ? -80 : 0,
+          y: isExpanded ? -20 : 0,
         }}
         transition={{ type: 'spring', stiffness: 340, damping: 34 }}
-        className="relative z-30 -mt-14 w-full bg-sb-white rounded-t-[28px] shadow-e3 px-6 pt-3 pb-8 flex flex-col items-center text-center flex-1"
+        className="relative z-30 -mt-10 w-full bg-sb-white rounded-t-[28px] shadow-e3 px-6 pt-3 pb-8 flex flex-col items-center text-center flex-1"
         data-testid="welcome-sheet"
       >
         {/* Grabber: clickable/draggable to expand value points */}

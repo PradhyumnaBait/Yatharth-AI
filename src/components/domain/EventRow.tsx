@@ -40,7 +40,7 @@ export const EventRow: React.FC<EventRowProps> = ({
     >
       <div className="flex items-center gap-3 min-w-0 pr-3">
         {/* 48px Thumbnail or Source Glyph on Navy Tint */}
-        <div className="relative w-12 h-12 rounded-[12px] overflow-hidden bg-sb-navy-tint flex-shrink-0 flex items-center justify-center border border-sb-border">
+        <div className="relative w-12 h-12 rounded-[12px] overflow-hidden bg-sb-navy-tint flex-shrink-0 flex items-center justify-center border border-sb-border shadow-sm">
           {thumbnailSrc ? (
             <Image
               src={thumbnailSrc}

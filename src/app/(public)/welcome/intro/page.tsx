@@ -20,7 +20,7 @@ interface IntroCard {
 const CARDS: IntroCard[] = [
   {
     id: 0,
-    image: '/images/hero-worker.jpg',
+    image: '/images/hero-worker-v2.jpg',
     icon: <Mic className="w-5 h-5" />,
     titleKey: 'step1Title',
     descKey: 'step1Desc',
@@ -67,7 +67,7 @@ export default function IntroPage() {
   return (
     <div
       data-testid="intro-screen-a2"
-      className="relative w-full h-full min-h-[844px] max-w-[390px] mx-auto bg-sb-navy overflow-hidden flex flex-col justify-between select-none"
+      className="relative w-full min-h-screen max-w-[420px] mx-auto bg-sb-navy overflow-y-auto flex flex-col justify-between select-none shadow-2xl"
     >
       {/* Top Skip Button */}
       <div className="absolute top-10 right-5 z-30">
@@ -82,7 +82,7 @@ export default function IntroPage() {
       </div>
 
       {/* Hero Photo Carousel */}
-      <div className="relative w-full h-[58%] min-h-[440px] shrink-0 overflow-hidden">
+      <div className="relative w-full h-[400px] sm:h-[440px] shrink-0 overflow-hidden">
         <AnimatePresence mode="wait">
           <motion.div
             key={currentCard.id}
@@ -97,18 +97,18 @@ export default function IntroPage() {
               alt={t[currentCard.titleKey]}
               fill
               priority
-              sizes="(max-width: 500px) 100vw, 390px"
+              sizes="(max-width: 500px) 100vw, 420px"
               className="object-cover object-center"
             />
-            {/* Flat photo scrim */}
-            <div className="absolute inset-0 bg-[#14213D]/28" />
+            {/* Scrim */}
+            <div className="absolute inset-0 bg-black/25" />
           </motion.div>
         </AnimatePresence>
       </div>
 
       {/* Overlapping White Panel */}
       <div
-        className="relative z-20 -mt-12 w-full bg-sb-white rounded-t-[28px] shadow-e3 px-6 pt-5 pb-8 flex flex-col items-center text-center flex-1 justify-between"
+        className="relative z-20 -mt-10 w-full bg-sb-white rounded-t-[28px] shadow-e3 px-6 pt-5 pb-8 flex flex-col items-center text-center flex-1 justify-between"
         data-testid="intro-panel"
       >
         {/* Step Icon Badge */}

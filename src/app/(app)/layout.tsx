@@ -40,7 +40,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
           {/* Main Viewport Content */}
           <div
             className={`flex-1 flex flex-col relative w-full h-full overflow-y-auto overflow-x-hidden ${
-              isDesktopNonSupervisor ? 'pb-20 lg:pb-0' : 'pb-20'
+              isDesktopNonSupervisor ? 'pb-24 lg:pb-0' : 'pb-24'
             }`}
           >
             {children}

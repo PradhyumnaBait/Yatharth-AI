@@ -37,8 +37,8 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({
       tabIndex={onClick ? 0 : undefined}
       className={`relative w-full rounded-[20px] overflow-hidden bg-sb-white border border-sb-border shadow-e1 cursor-pointer sb-press-spring focus-visible:outline focus-visible:outline-2 focus-visible:outline-sb-navy ${className}`}
     >
-      {/* 16:9 Hero Photo (Height ~168px) with Flat Scrim */}
-      <div className="relative w-full h-[168px] bg-sb-navy">
+      {/* Hero Photo with ample height and proper framing */}
+      <div className="relative w-full h-[185px] bg-sb-navy overflow-hidden">
         <Image
           src={imageSrc}
           alt={title}
@@ -46,13 +46,13 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({
           priority
           unoptimized
           sizes="(max-width: 450px) 100vw, 400px"
-          className="object-cover"
+          className="object-cover object-[center_35%]"
         />
-        <div className="absolute inset-0 bg-sb-scrim" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-black/10" />
       </div>
 
-      {/* White Panel Overlapping the Photo by 24px, Radius 24px */}
-      <div className="relative -mt-6 bg-sb-white rounded-t-[24px] p-5 pt-4">
+      {/* White Panel Overlapping the Photo by 20px, Radius 24px */}
+      <div className="relative -mt-5 bg-sb-white rounded-t-[24px] p-5 pt-4">
         <h3 className="text-title-3 font-semibold text-sb-navy line-clamp-1 mb-3">
           {title}
         </h3>

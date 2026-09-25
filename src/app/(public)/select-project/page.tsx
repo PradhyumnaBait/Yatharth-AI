@@ -11,7 +11,7 @@ import { TRANSLATIONS } from '@/lib/translations';
 
 const PROJECT_THUMBS: Record<string, string> = {
   'kandla-panipat-p3': '/images/pipeline-trench.jpg',
-  'duliajan-upgrade': '/images/hero-worker.jpg',
+  'duliajan-upgrade': '/images/plant-duliajan.jpg',
   'numaligarh-tank-farm': '/images/refinery-pipes.jpg',
 };
 

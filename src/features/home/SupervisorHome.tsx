@@ -190,7 +190,7 @@ export const SupervisorHome: React.FC<SupervisorHomeProps> = ({ activePill }) =>
 
   // Default: 'all' pill — Pixel match of Reference Screen 2!
   return (
-    <div data-testid="supervisor-all-body" className="space-y-4 pb-2">
+    <div data-testid="supervisor-all-body" className="space-y-4 pb-16">
       {/* Active Project Section */}
       <section className="px-4">
         <div className="flex items-center justify-between mb-2">
