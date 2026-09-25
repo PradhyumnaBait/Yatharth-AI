@@ -101,3 +101,4 @@ export interface AdminService {
 }
 
 export * from './types';
+export * from './provider';

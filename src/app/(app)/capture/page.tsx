@@ -27,6 +27,7 @@ import { useAuthStore } from '@/store/auth';
 import { useUiStore } from '@/store/ui';
 import { demoNow } from '@/mocks/clock';
 import { ExtractedInfo, FieldEvent } from '@/services/types';
+import { voiceService } from '@/services';
 
 type CaptureState =
   | 'idle'
@@ -143,10 +144,24 @@ function CapturePageContent() {
         }
       };
 
-      recorder.onstop = () => {
+      recorder.onstop = async () => {
         const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
         const url = URL.createObjectURL(audioBlob);
         setAudioUrl(url);
+
+        try {
+          const res = await voiceService.transcribe(audioBlob);
+          if (res && res.transcript && res.transcript.trim()) {
+            processText(res.transcript.trim());
+          } else {
+            useUiStore.getState().showToast("Couldn't transcribe — try again or type it.");
+            setState('idle');
+          }
+        } catch (err: any) {
+          console.warn('Transcription error:', err);
+          useUiStore.getState().showToast(err?.message || "Couldn't transcribe — try again or type it.");
+          setState('idle');
+        }
       };
 
       recorder.start();
@@ -167,16 +182,7 @@ function CapturePageContent() {
       stream.getTracks().forEach((t) => t.stop());
       setStream(null);
     }
-
     setState('transcribing');
-
-    // Simulate 700ms transcription latency
-    setTimeout(() => {
-      const defaultText = prefilledActivity
-        ? `Activity ${prefilledActivity} field progress completed.`
-        : 'Line 24-XX ki spool 18 welding complete ho gayi hai.';
-      processText(defaultText);
-    }, 700);
   };
   stopRecordingRef.current = stopRecording;
 
