@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { PageHeader } from '@/components/shell/PageHeader';
 import { UnderlineTabs, TabItem } from '@/components/ui/UnderlineTabs';
@@ -14,17 +14,23 @@ import {
   CheckCheck,
   ChevronRight,
   Info,
+  Loader2,
 } from 'lucide-react';
 import { useTranslation } from '@/i18n/useTranslation';
 
 export default function NotificationsPage() {
   const router = useRouter();
   const { t } = useTranslation();
+  const [mounted, setMounted] = useState(false);
   const notifications = useNotificationsStore((s) => s.notifications);
   const markAsRead = useNotificationsStore((s) => s.markAsRead);
   const markAllAsRead = useNotificationsStore((s) => s.markAllAsRead);
 
   const [activeTab, setActiveTab] = useState<'all' | 'needs-action'>('all');
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const needsActionCount = useMemo(() => {
     return notifications.filter((n) => n.needsAction && !n.read).length;
@@ -32,7 +38,7 @@ export default function NotificationsPage() {
 
   const tabs: TabItem[] = [
     { id: 'all', label: t('notifications.all'), count: notifications.filter((n) => !n.read).length || undefined },
-    { id: 'needs-action', label: t('notifications.needs_action'), count: needsActionCount || undefined },
+    { id: 'needs-action', label: t('notifications.needs_action') || t('notifications.needsAction'), count: needsActionCount || undefined },
   ];
 
   const filteredNotifications = useMemo(() => {
@@ -64,6 +70,18 @@ export default function NotificationsPage() {
     }
   };
 
+  if (!mounted) {
+    return (
+      <div className="flex flex-col min-h-full bg-sb-bg pb-24">
+        <PageHeader variant="back" title={t('notifications.title')} subtitle="Action items & alerts" />
+        <div className="p-8 flex flex-col items-center justify-center space-y-3">
+          <Loader2 className="w-8 h-8 text-sb-navy animate-spin" />
+          <p className="text-caption text-sb-ink-3">Loading notifications...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="flex flex-col min-h-full bg-sb-bg pb-24" data-testid="notifications-screen-s1">
       {/* 1. Header */}
@@ -79,7 +97,7 @@ export default function NotificationsPage() {
             className="text-caption font-semibold text-sb-navy hover:underline flex items-center gap-1 mr-1"
           >
             <CheckCheck className="w-4 h-4" />
-            <span>{t('notifications.mark_all_read')}</span>
+            <span>{t('notifications.mark_all_read') || t('notifications.markAllRead')}</span>
           </button>
         }
       />
@@ -99,7 +117,7 @@ export default function NotificationsPage() {
           <div className="p-8 bg-sb-white rounded-2xl border border-sb-border text-center space-y-2">
             <Bell className="w-8 h-8 text-sb-ink-3 mx-auto" />
             <div className="text-caption text-sb-ink-3 font-medium">
-              {activeTab === 'needs-action' ? 'No actions required right now.' : 'No notifications.'}
+              {activeTab === 'needs-action' ? 'No actions required right now.' : (t('notifications.noNotifications') || 'No notifications.')}
             </div>
           </div>
         ) : (

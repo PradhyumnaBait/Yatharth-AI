@@ -3,6 +3,7 @@
 import React, { useState, useMemo, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { PageHeader } from '@/components/shell/PageHeader';
+import { PageContainer } from '@/components/shell/PageContainer';
 import { UnderlineTabs, TabItem } from '@/components/ui/UnderlineTabs';
 import { ConfidenceBadge } from '@/components/domain/ConfidenceBadge';
 import { Sheet } from '@/components/ui/Sheet';
@@ -188,237 +189,243 @@ function WorkbenchContent() {
   };
 
   return (
-    <div className="flex-1 flex flex-col lg:flex-row h-full overflow-hidden bg-sb-bg" data-testid="workbench-queue-pl2">
+    <PageContainer
+      maxWidth="container"
+      withGutter={false}
+      withVerticalRhythm={false}
+      className="flex-1 flex flex-col lg:flex-row h-full overflow-hidden bg-sb-bg"
+      data-testid="workbench-queue-pl2"
+    >
       {/* Left Pane: Queue */}
       <div className="w-full lg:w-[420px] lg:border-r lg:border-sb-border flex flex-col h-full overflow-y-auto pb-28 lg:pb-6 shrink-0">
         {/* 1. Header with Freshness */}
         <PageHeader
           variant="back"
           title="Workbench"
-        subtitle={
-          <div className="flex items-center gap-1.5 text-caption text-sb-ink-2 font-mono">
-            <span>Data Freshness</span>
-            <FreshnessClock />
-          </div>
-        }
-        rightAction={
-          <div className="flex items-center gap-1">
-            <button
-              type="button"
-              data-testid="queue-sort-btn"
-              onClick={() => setSortSheetOpen(true)}
-              aria-label="Sort queue"
-              className="w-9 h-9 rounded-full flex items-center justify-center text-sb-ink hover:bg-sb-navy-tint transition-colors"
-            >
-              <ArrowUpDown className="w-4 h-4" />
-            </button>
-            <button
-              type="button"
-              data-testid="queue-filter-btn"
-              onClick={() => setFilterSheetOpen(true)}
-              aria-label="Filter queue"
-              className="w-9 h-9 rounded-full flex items-center justify-center text-sb-ink hover:bg-sb-navy-tint transition-colors"
-            >
-              <Filter className="w-4 h-4" />
-            </button>
-          </div>
-        }
-      />
-
-      {/* 2. Underline Tabs (Review · Unmatched · Warnings · Done) */}
-      <div className="px-4 pt-2 bg-sb-bg">
-        <UnderlineTabs
-          tabs={tabs}
-          activeId={activeTab}
-          onChange={(id) => {
-            setActiveTab(id as QueueTab);
-            setSelectedIds([]);
-          }}
-          data-testid="workbench-tabs"
+          subtitle={
+            <div className="flex items-center gap-1.5 text-caption text-sb-ink-2 font-mono">
+              <span>Data Freshness</span>
+              <FreshnessClock />
+            </div>
+          }
+          rightAction={
+            <div className="flex items-center gap-1">
+              <button
+                type="button"
+                data-testid="queue-sort-btn"
+                onClick={() => setSortSheetOpen(true)}
+                aria-label="Sort queue"
+                className="w-9 h-9 rounded-full flex items-center justify-center text-sb-ink hover:bg-sb-navy-tint transition-colors"
+              >
+                <ArrowUpDown className="w-4 h-4" />
+              </button>
+              <button
+                type="button"
+                data-testid="queue-filter-btn"
+                onClick={() => setFilterSheetOpen(true)}
+                aria-label="Filter queue"
+                className="w-9 h-9 rounded-full flex items-center justify-center text-sb-ink hover:bg-sb-navy-tint transition-colors"
+              >
+                <Filter className="w-4 h-4" />
+              </button>
+            </div>
+          }
         />
-      </div>
 
-      {/* 3. Sub-header Toolbar: Count & Select mode toggle */}
-      <div className="px-4 py-2.5 flex items-center justify-between">
-        <span className="text-caption font-medium text-sb-ink-2">
-          {currentEvents.length} items awaiting review
-        </span>
-
-        {activeTab === 'review' && (
-          <button
-            type="button"
-            data-testid="toggle-select-mode-btn"
-            onClick={() => {
-              setIsSelectMode(!isSelectMode);
+        {/* 2. Underline Tabs (Review · Unmatched · Warnings · Done) */}
+        <div className="px-4 pt-2 bg-sb-bg">
+          <UnderlineTabs
+            tabs={tabs}
+            activeId={activeTab}
+            onChange={(id) => {
+              setActiveTab(id as QueueTab);
               setSelectedIds([]);
             }}
-            className={`text-caption font-semibold px-3 py-1 rounded-full border transition-colors ${
-              isSelectMode
-                ? 'bg-sb-navy text-sb-white border-sb-navy'
-                : 'bg-sb-white text-sb-navy border-sb-border hover:bg-sb-bg'
-            }`}
-          >
-            {isSelectMode ? 'Cancel' : 'Select'}
-          </button>
-        )}
-      </div>
-
-      {/* Multi-Select Select-All Bar */}
-      {isSelectMode && activeTab === 'review' && (
-        <div className="mx-4 mb-2 p-2.5 bg-sb-white rounded-xl border border-sb-border flex items-center justify-between shadow-sm">
-          <button
-            type="button"
-            data-testid="select-all-btn"
-            onClick={handleSelectAllSelectable}
-            className="flex items-center gap-2 text-caption font-semibold text-sb-navy"
-          >
-            {selectedIds.length > 0 ? (
-              <CheckSquare className="w-4 h-4 text-sb-navy" />
-            ) : (
-              <Square className="w-4 h-4 text-sb-ink-3" />
-            )}
-            <span>Select All Eligible</span>
-          </button>
-          <span className="text-caption font-mono text-sb-ink-3">
-            {selectedIds.length} selected
-          </span>
+            data-testid="workbench-tabs"
+          />
         </div>
-      )}
 
-      {/* 4. Queue List */}
-      <div className="px-4 space-y-2.5">
-        {currentEvents.length === 0 ? (
-          <div className="p-8 bg-sb-white rounded-2xl border border-sb-border text-center space-y-3 shadow-sm" data-testid="queue-empty-state">
-            <CheckCircle2 className="w-10 h-10 text-sb-verified mx-auto" />
-            <div className="text-callout font-bold text-sb-navy">Queue is clear</div>
-            <div className="text-caption text-sb-ink-3">
-              Last approval 3 minutes ago · Data date 20 Sep 2026.
-            </div>
+        {/* 3. Sub-header Toolbar: Count & Select mode toggle */}
+        <div className="px-4 py-2.5 flex items-center justify-between">
+          <span className="text-caption font-medium text-sb-ink-2">
+            {currentEvents.length} items awaiting review
+          </span>
+
+          {activeTab === 'review' && (
             <button
               type="button"
-              onClick={() => router.push('/home')}
-              className="px-4 py-2 rounded-full bg-sb-navy text-sb-white text-caption font-semibold inline-flex items-center gap-1.5 shadow-sm"
+              data-testid="toggle-select-mode-btn"
+              onClick={() => {
+                setIsSelectMode(!isSelectMode);
+                setSelectedIds([]);
+              }}
+              className={`text-caption font-semibold px-3 py-1 rounded-full border transition-colors ${
+                isSelectMode
+                  ? 'bg-sb-navy text-sb-white border-sb-navy'
+                  : 'bg-sb-white text-sb-navy border-sb-border hover:bg-sb-bg'
+              }`}
             >
-              <span>Go to Home</span>
+              {isSelectMode ? 'Cancel' : 'Select'}
             </button>
+          )}
+        </div>
+
+        {/* Multi-Select Select-All Bar */}
+        {isSelectMode && activeTab === 'review' && (
+          <div className="mx-4 mb-2 p-2.5 bg-sb-white rounded-xl border border-sb-border flex items-center justify-between shadow-sm">
+            <button
+              type="button"
+              data-testid="select-all-btn"
+              onClick={handleSelectAllSelectable}
+              className="flex items-center gap-2 text-caption font-semibold text-sb-navy"
+            >
+              {selectedIds.length > 0 ? (
+                <CheckSquare className="w-4 h-4 text-sb-navy" />
+              ) : (
+                <Square className="w-4 h-4 text-sb-ink-3" />
+              )}
+              <span>Select All Eligible</span>
+            </button>
+            <span className="text-caption font-mono text-sb-ink-3">
+              {selectedIds.length} selected
+            </span>
           </div>
-        ) : (
-          currentEvents.map((evt) => {
-            const isEligible = evt.logicCheckStatus === 'Passed';
-            const isSelected = selectedIds.includes(evt.id);
-            const isCurrentSelected = selectedEventId === evt.id;
+        )}
 
-            return (
-              <div
-                key={evt.id}
-                data-testid={`event-item-${evt.id}`}
-                onClick={() => {
-                  if (isSelectMode) {
-                    toggleSelect(evt.id, isEligible);
-                  } else {
-                    setSelectedEventId(evt.id);
-                    if (typeof window !== 'undefined' && window.innerWidth < 1024) {
-                      router.push(`/workbench/${evt.id}`);
-                    }
-                  }
-                }}
-                className={`bg-sb-white rounded-xl p-3.5 border transition-all cursor-pointer shadow-sm relative group ${
-                  isSelected
-                    ? 'border-sb-navy bg-sb-navy-tint/20'
-                    : isCurrentSelected
-                    ? 'border-sb-navy ring-1 ring-sb-navy bg-sb-navy-tint/10'
-                    : 'border-sb-border hover:border-sb-navy/40'
-                }`}
+        {/* 4. Queue List */}
+        <div className="px-4 space-y-2.5">
+          {currentEvents.length === 0 ? (
+            <div className="p-8 bg-sb-white rounded-2xl border border-sb-border text-center space-y-3 shadow-sm" data-testid="queue-empty-state">
+              <CheckCircle2 className="w-10 h-10 text-sb-verified mx-auto" />
+              <div className="text-callout font-bold text-sb-navy">Queue is clear</div>
+              <div className="text-caption text-sb-ink-3">
+                Last approval 3 minutes ago · Data date 20 Sep 2026.
+              </div>
+              <button
+                type="button"
+                onClick={() => router.push('/home')}
+                className="px-4 py-2 rounded-full bg-sb-navy text-sb-white text-caption font-semibold inline-flex items-center gap-1.5 shadow-sm"
               >
-                <div className="flex items-start gap-3">
-                  {/* Checkbox (in select mode) or Source Icon */}
-                  {isSelectMode ? (
-                    <div data-testid={`checkbox-${evt.id}`} className="pt-0.5 shrink-0">
-                      {isEligible ? (
-                        isSelected ? (
-                          <CheckSquare className="w-5 h-5 text-sb-navy" />
-                        ) : (
-                          <Square className="w-5 h-5 text-sb-ink-3" />
-                        )
-                      ) : (
-                        <div
-                          title="Predecessor incomplete"
-                          className="w-5 h-5 rounded flex items-center justify-center bg-sb-bg text-sb-ink-3 cursor-not-allowed"
-                        >
-                          <X className="w-3.5 h-3.5" />
-                        </div>
-                      )}
-                    </div>
-                  ) : (
-                    renderSourceGlyph(evt.source)
-                  )}
+                <span>Go to Home</span>
+              </button>
+            </div>
+          ) : (
+            currentEvents.map((evt) => {
+              const isEligible = evt.logicCheckStatus === 'Passed';
+              const isSelected = selectedIds.includes(evt.id);
+              const isCurrentSelected = selectedEventId === evt.id;
 
-                  {/* Content */}
-                  <div className="min-w-0 flex-1 space-y-1">
-                    <div className="flex items-center justify-between gap-2">
-                      <div className="flex items-center gap-2 min-w-0">
-                        <span className="font-mono text-[11px] font-bold text-sb-navy">
-                          {evt.id}
-                        </span>
-                        <span className="text-[11px] font-mono text-sb-ink-3">
-                          · {evt.timestamp}
-                        </span>
-                        {evt.authorName && (
-                          <span className="text-[11px] text-sb-ink-3 truncate">
-                            · {evt.authorName}
+              return (
+                <div
+                  key={evt.id}
+                  data-testid={`event-item-${evt.id}`}
+                  onClick={() => {
+                    if (isSelectMode) {
+                      toggleSelect(evt.id, isEligible);
+                    } else {
+                      setSelectedEventId(evt.id);
+                      if (typeof window !== 'undefined' && window.innerWidth < 1024) {
+                        router.push(`/workbench/${evt.id}`);
+                      }
+                    }
+                  }}
+                  className={`bg-sb-white rounded-xl p-3.5 border transition-all cursor-pointer shadow-sm relative group ${
+                    isSelected
+                      ? 'border-sb-navy bg-sb-navy-tint/20'
+                      : isCurrentSelected
+                      ? 'border-sb-navy ring-1 ring-sb-navy bg-sb-navy-tint/10'
+                      : 'border-sb-border hover:border-sb-navy/40'
+                  }`}
+                >
+                  <div className="flex items-start gap-3">
+                    {/* Checkbox (in select mode) or Source Icon */}
+                    {isSelectMode ? (
+                      <div data-testid={`checkbox-${evt.id}`} className="pt-0.5 shrink-0">
+                        {isEligible ? (
+                          isSelected ? (
+                            <CheckSquare className="w-5 h-5 text-sb-navy" />
+                          ) : (
+                            <Square className="w-5 h-5 text-sb-ink-3" />
+                          )
+                        ) : (
+                          <div
+                            title="Predecessor incomplete"
+                            className="w-5 h-5 rounded flex items-center justify-center bg-sb-bg text-sb-ink-3 cursor-not-allowed"
+                          >
+                            <X className="w-3.5 h-3.5" />
+                          </div>
+                        )}
+                      </div>
+                    ) : (
+                      renderSourceGlyph(evt.source)
+                    )}
+
+                    {/* Content */}
+                    <div className="min-w-0 flex-1 space-y-1">
+                      <div className="flex items-center justify-between gap-2">
+                        <div className="flex items-center gap-2 min-w-0">
+                          <span className="font-mono text-[11px] font-bold text-sb-navy">
+                            {evt.id}
                           </span>
+                          <span className="text-[11px] font-mono text-sb-ink-3">
+                            · {evt.timestamp}
+                          </span>
+                          {evt.authorName && (
+                            <span className="text-[11px] text-sb-ink-3 truncate">
+                              · {evt.authorName}
+                            </span>
+                          )}
+                        </div>
+
+                        {/* Confidence Badge */}
+                        {evt.confidence && (
+                          <ConfidenceBadge
+                            confidence={evt.confidence}
+                            data-testid={`confidence-${evt.id}`}
+                          />
                         )}
                       </div>
 
-                      {/* Confidence Badge */}
-                      {evt.confidence && (
-                        <ConfidenceBadge
-                          confidence={evt.confidence}
-                          data-testid={`confidence-${evt.id}`}
-                        />
-                      )}
-                    </div>
+                      {/* Raw Text */}
+                      <div className="text-caption text-sb-ink font-medium line-clamp-2 leading-relaxed">
+                        &ldquo;{evt.rawText}&rdquo;
+                      </div>
 
-                    {/* Raw Text */}
-                    <div className="text-caption text-sb-ink font-medium line-clamp-2 leading-relaxed">
-                      &ldquo;{evt.rawText}&rdquo;
-                    </div>
-
-                    {/* Suggested Activity */}
-                    <div className="flex items-center justify-between pt-1">
-                      {evt.suggestedActivityId ? (
-                        <div className="flex items-center gap-1.5 text-[11px] text-sb-ink-2 truncate">
-                          <span className="font-mono font-bold text-sb-navy bg-sb-bg px-1.5 py-0.2 rounded">
-                            {evt.suggestedActivityId}
+                      {/* Suggested Activity */}
+                      <div className="flex items-center justify-between pt-1">
+                        {evt.suggestedActivityId ? (
+                          <div className="flex items-center gap-1.5 text-[11px] text-sb-ink-2 truncate">
+                            <span className="font-mono font-bold text-sb-navy bg-sb-bg px-1.5 py-0.2 rounded">
+                              {evt.suggestedActivityId}
+                            </span>
+                            <span className="truncate">{evt.suggestedActivityName}</span>
+                          </div>
+                        ) : (
+                          <span className="text-[11px] text-sb-critical font-medium">
+                            No confident schedule match
                           </span>
-                          <span className="truncate">{evt.suggestedActivityName}</span>
-                        </div>
-                      ) : (
-                        <span className="text-[11px] text-sb-critical font-medium">
-                          No confident schedule match
-                        </span>
-                      )}
+                        )}
 
-                      {!isEligible && (
-                        <span
-                          data-testid={`ineligible-badge-${evt.id}`}
-                          className="text-[10px] font-semibold text-sb-critical bg-sb-critical-tint px-2 py-0.5 rounded-full shrink-0"
-                        >
-                          Predecessor incomplete
-                        </span>
-                      )}
+                        {!isEligible && (
+                          <span
+                            data-testid={`ineligible-badge-${evt.id}`}
+                            className="text-[10px] font-semibold text-sb-critical bg-sb-critical-tint px-2 py-0.5 rounded-full shrink-0"
+                          >
+                            Predecessor incomplete
+                          </span>
+                        )}
+                      </div>
                     </div>
-                  </div>
 
-                  {!isSelectMode && (
-                    <ChevronRight className="w-5 h-5 text-sb-ink-3 group-hover:text-sb-navy group-hover:translate-x-0.5 transition-all mt-2 shrink-0" />
-                  )}
+                    {!isSelectMode && (
+                      <ChevronRight className="w-5 h-5 text-sb-ink-3 group-hover:text-sb-navy group-hover:translate-x-0.5 transition-all mt-2 shrink-0" />
+                    )}
+                  </div>
                 </div>
-              </div>
-            );
-          })
-        )}
-      </div>
+              );
+            })
+          )}
+        </div>
       </div>
 
       {/* Right Pane: Match Review on desktop */}
@@ -614,13 +621,44 @@ function WorkbenchContent() {
           duration={8000}
         />
       )}
+    </PageContainer>
+  );
+}
+
+import { Skeleton } from '@/components/ui/Skeleton';
+
+function WorkbenchSkeleton() {
+  return (
+    <div className="flex flex-col lg:flex-row min-h-screen bg-sb-bg" data-testid="workbench-skeleton">
+      <div className="w-full lg:w-[420px] lg:border-r lg:border-sb-border p-4 space-y-3">
+        <div className="flex items-center justify-between pb-2 border-b border-sb-border">
+          <Skeleton variant="text" width={140} height={24} />
+          <Skeleton variant="pill" width={60} height={28} />
+        </div>
+        <div className="flex gap-4 border-b border-sb-border pb-2">
+          <Skeleton variant="pill" width={64} height={24} />
+          <Skeleton variant="pill" width={72} height={24} />
+          <Skeleton variant="pill" width={68} height={24} />
+          <Skeleton variant="pill" width={56} height={24} />
+        </div>
+        <div className="space-y-2.5 pt-2">
+          <Skeleton variant="row" height={96} className="rounded-xl" />
+          <Skeleton variant="row" height={96} className="rounded-xl" />
+          <Skeleton variant="row" height={96} className="rounded-xl" />
+        </div>
+      </div>
+      <div className="hidden lg:flex flex-1 p-6 space-y-4">
+        <Skeleton variant="rect" height={60} className="rounded-2xl w-full" />
+        <Skeleton variant="rect" height={220} className="rounded-2xl w-full" />
+        <Skeleton variant="rect" height={240} className="rounded-2xl w-full" />
+      </div>
     </div>
   );
 }
 
 export default function WorkbenchPage() {
   return (
-    <Suspense fallback={<div className="min-h-screen bg-sb-bg" />}>
+    <Suspense fallback={<WorkbenchSkeleton />}>
       <WorkbenchContent />
     </Suspense>
   );

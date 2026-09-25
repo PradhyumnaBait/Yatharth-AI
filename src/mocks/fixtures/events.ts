@@ -431,3 +431,73 @@ export function generateSeedEvents(snapshot: 'reference' | 'demo-start' = 'demo-
 
   return events;
 }
+
+export const NUMALIGARH_EVENTS: FieldEvent[] = [
+  {
+    id: 'E-3001',
+    source: 'voice',
+    timestamp: '08:15 AM',
+    rawText: 'Tank T-501 ring beam foundation excavation started today morning.',
+    authorName: 'Bikash Das',
+    authorRole: 'Site Supervisor',
+    authorCrew: 'Civil Foundation Crew 1',
+    status: 'Review',
+    queueTier: 'Review',
+    confidence: 92,
+    suggestedActivityId: 'NUM-TK-002',
+    suggestedActivityName: 'Tank Foundation Ring Beam Excavation T-501',
+    extractedInfo: {
+      action: 'Excavation',
+      object: 'Ring beam foundation',
+      location: 'Tank T-501',
+      status: 'In progress',
+    },
+    reasons: [
+      { label: 'Foundation Excavation', matchedText: 'foundation excavation' },
+      { label: 'Tank T-501', matchedText: 'Tank T-501' },
+    ],
+    logicCheckStatus: 'Passed',
+    logicCheckMessage: 'Predecessor NUM-TK-001 geo-technical survey verified complete.',
+  },
+  {
+    id: 'E-3002',
+    source: 'excel',
+    timestamp: '09:00 AM',
+    rawText: 'Site clearing and geo-technical boreholes 1-4 completed 100%',
+    authorName: 'GeoTech Contractors Ltd',
+    authorRole: 'Subcontractor Lead',
+    status: 'Verified',
+    queueTier: 'Verified',
+    confidence: 96,
+    suggestedActivityId: 'NUM-TK-001',
+    suggestedActivityName: 'Site Clearing & Geo-Technical Survey Tank 1-4',
+    extractedInfo: {
+      action: 'Site Clearing & Geo-tech',
+      status: 'Complete',
+    },
+    reasons: [
+      { label: 'Survey clearance', matchedText: 'geo-technical boreholes' },
+    ],
+    logicCheckStatus: 'Passed',
+    approvedAt: '2026-11-01T09:30:00+05:30',
+    approvedBy: 'Meera Nair',
+  },
+  {
+    id: 'E-3003',
+    source: 'voice',
+    timestamp: '10:45 AM',
+    rawText: 'Subcontractor batching plant calibration report pending from third-party lab.',
+    authorName: 'Bikash Das',
+    authorRole: 'Site Supervisor',
+    status: 'Unmatched',
+    queueTier: 'Unmatched',
+    confidence: 48,
+    extractedInfo: {
+      action: 'Calibration verification',
+      object: 'Batching plant',
+    },
+    reasons: [],
+    logicCheckStatus: 'Failed',
+    logicCheckMessage: 'Quality assurance checklist item without direct WBS mapping.',
+  },
+];

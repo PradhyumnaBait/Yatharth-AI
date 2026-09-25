@@ -48,6 +48,13 @@ export default function SettingsPage() {
   const [criticalAlerts, setCriticalAlerts] = useState(true);
   const [reviewAlerts, setReviewAlerts] = useState(true);
   const [dailyDigest, setDailyDigest] = useState(false);
+  const [showDevControls, setShowDevControls] = useState(false);
+
+  React.useEffect(() => {
+    const isDevEnv = process.env.NEXT_PUBLIC_SHOW_DEV_CONTROLS === 'true';
+    const isDevQuery = typeof window !== 'undefined' && (window.location.search.includes('dev=1') || window.location.search.includes('dev=true'));
+    setShowDevControls(isDevEnv || isDevQuery);
+  }, []);
 
   // Compute live tier counts based on slider thresholds
   const tierCounts = useMemo(() => {
@@ -95,138 +102,166 @@ export default function SettingsPage() {
       <PageHeader variant="back" title={t('settings.title')} />
 
       <div className="px-4 py-3 space-y-4">
-        {/* Section: Matching Rules (Planner & Admin) */}
+        {/* Section: Matching Rules & Governance (Planner & Admin) */}
         <div className="bg-white p-4 rounded-card border border-sb-border shadow-e1 space-y-4">
           <div className="flex items-center justify-between">
             <div>
               <h3 className="text-body font-semibold text-sb-ink">{t('settings.matching_thresholds')}</h3>
               <p className="text-caption text-sb-text-muted">
-                {t('settings.matching_desc')}
+                {showDevControls
+                  ? 'Developer Mode: Live threshold calibration'
+                  : 'Prototype Calibration & Governance Rules'}
               </p>
             </div>
             <Sliders className="w-4 h-4 text-sb-navy" aria-hidden="true" />
           </div>
 
-          {/* Slider 1: Auto-Accept Threshold */}
-          <div className="space-y-1.5">
-            <div className="flex items-center justify-between text-caption">
-              <label htmlFor="auto-accept-slider" className="font-semibold text-sb-ink">
-                {t('settings.auto_accept_threshold')} (≥)
-              </label>
-              <span
-                data-testid="auto-accept-value"
-                className="font-mono font-bold text-sb-verified text-body"
-              >
-                {autoAcceptThreshold}%
-              </span>
-            </div>
-            <input
-              id="auto-accept-slider"
-              type="range"
-              min="70"
-              max="100"
-              step="1"
-              data-testid="slider-auto-accept"
-              aria-label={t('settings.auto_accept_threshold')}
-              value={autoAcceptThreshold}
-              onChange={(e) => setAutoAcceptThreshold(Number(e.target.value))}
-              className="w-full accent-sb-navy cursor-pointer"
-            />
+          {/* Raw AI Matching Sliders (Gated behind showDevControls) */}
+          {showDevControls ? (
+            <div className="space-y-4 pt-1">
+              {/* Slider 1: Auto-Accept Threshold */}
+              <div className="space-y-1.5">
+                <div className="flex items-center justify-between text-caption">
+                  <label htmlFor="auto-accept-slider" className="font-semibold text-sb-ink">
+                    {t('settings.auto_accept_threshold')} (≥)
+                  </label>
+                  <span
+                    data-testid="auto-accept-value"
+                    className="font-mono font-bold text-sb-verified text-body"
+                  >
+                    {autoAcceptThreshold}%
+                  </span>
+                </div>
+                <input
+                  id="auto-accept-slider"
+                  type="range"
+                  min="70"
+                  max="100"
+                  step="1"
+                  data-testid="slider-auto-accept"
+                  aria-label={t('settings.auto_accept_threshold')}
+                  value={autoAcceptThreshold}
+                  onChange={(e) => setAutoAcceptThreshold(Number(e.target.value))}
+                  className="w-full accent-sb-navy cursor-pointer"
+                />
 
-            <div className="flex justify-between text-[11px] text-sb-text-subtle font-mono">
-              <span>70%</span>
-              <span>85%</span>
-              <span>100%</span>
-            </div>
-          </div>
-
-          {/* Slider 2: Unmatched Threshold */}
-          <div className="space-y-1.5">
-            <div className="flex items-center justify-between text-caption">
-              <label htmlFor="unmatched-slider" className="font-semibold text-sb-ink">
-                Unmatched Threshold (&lt;)
-              </label>
-              <span
-                data-testid="review-threshold-value"
-                className="font-mono font-bold text-sb-critical text-body"
-              >
-                {reviewThreshold}%
-              </span>
-            </div>
-            <input
-              id="unmatched-slider"
-              type="range"
-              min="30"
-              max="70"
-              step="1"
-              data-testid="slider-unmatched"
-              value={reviewThreshold}
-              onChange={(e) => setReviewThreshold(Number(e.target.value))}
-              className="w-full accent-sb-navy cursor-pointer"
-            />
-            <div className="flex justify-between text-[11px] text-sb-text-subtle font-mono">
-              <span>30%</span>
-              <span>50%</span>
-              <span>70%</span>
-            </div>
-          </div>
-
-          {/* Live Tier Preview Bar */}
-          <div className="pt-2 border-t border-sb-border-subtle space-y-2">
-            <div className="flex items-center justify-between text-caption">
-              <span className="font-semibold text-sb-ink">Live Queue Tier Distribution</span>
-              <span className="text-mono-s text-sb-text-subtle">{events.length} total events</span>
-            </div>
-
-            {/* 3-segment bar */}
-            <div
-              data-testid="tier-preview-bar"
-              className="h-3.5 w-full bg-slate-100 rounded-full overflow-hidden flex"
-            >
-              <div
-                data-testid="tier-preview-auto-accept"
-                className="bg-emerald-600 transition-all duration-300"
-                style={{ width: `${tierCounts.autoAcceptPct}%` }}
-                title={`Auto-accept: ${tierCounts.autoAccept} events`}
-              />
-              <div
-                data-testid="tier-preview-review"
-                className="bg-amber-500 transition-all duration-300"
-                style={{ width: `${tierCounts.reviewPct}%` }}
-                title={`Review: ${tierCounts.review} events`}
-              />
-              <div
-                data-testid="tier-preview-unmatched"
-                className="bg-red-500 transition-all duration-300"
-                style={{ width: `${tierCounts.unmatchedPct}%` }}
-                title={`Unmatched: ${tierCounts.unmatched} events`}
-              />
-            </div>
-
-            {/* Tier Legend with live counts */}
-            <div className="grid grid-cols-3 gap-1 text-[11px] pt-1 text-center">
-              <div className="p-1 rounded bg-emerald-50 text-emerald-900 border border-emerald-200">
-                <span className="block font-bold">Auto-accept</span>
-                <span data-testid="tier-count-auto-accept" className="font-mono font-bold">
-                  {tierCounts.autoAccept} events
-                </span>
+                <div className="flex justify-between text-[11px] text-sb-text-subtle font-mono">
+                  <span>70%</span>
+                  <span>85%</span>
+                  <span>100%</span>
+                </div>
               </div>
 
-              <div className="p-1 rounded bg-amber-50 text-amber-900 border border-amber-200">
-                <span className="block font-bold">Review</span>
-                <span data-testid="tier-count-review" className="font-mono font-bold">
-                  {tierCounts.review} events
-                </span>
+              {/* Slider 2: Unmatched Threshold */}
+              <div className="space-y-1.5">
+                <div className="flex items-center justify-between text-caption">
+                  <label htmlFor="unmatched-slider" className="font-semibold text-sb-ink">
+                    Unmatched Threshold (&lt;)
+                  </label>
+                  <span
+                    data-testid="review-threshold-value"
+                    className="font-mono font-bold text-sb-critical text-body"
+                  >
+                    {reviewThreshold}%
+                  </span>
+                </div>
+                <input
+                  id="unmatched-slider"
+                  type="range"
+                  min="30"
+                  max="70"
+                  step="1"
+                  data-testid="slider-unmatched"
+                  value={reviewThreshold}
+                  onChange={(e) => setReviewThreshold(Number(e.target.value))}
+                  className="w-full accent-sb-navy cursor-pointer"
+                />
+                <div className="flex justify-between text-[11px] text-sb-text-subtle font-mono">
+                  <span>30%</span>
+                  <span>50%</span>
+                  <span>70%</span>
+                </div>
               </div>
 
-              <div className="p-1 rounded bg-red-50 text-red-900 border border-red-200">
-                <span className="block font-bold">Unmatched</span>
-                <span data-testid="tier-count-unmatched" className="font-mono font-bold">
-                  {tierCounts.unmatched} events
-                </span>
+              {/* Live Tier Preview Bar */}
+              <div className="pt-2 border-t border-sb-border-subtle space-y-2">
+                <div className="flex items-center justify-between text-caption">
+                  <span className="font-semibold text-sb-ink">Live Queue Tier Distribution</span>
+                  <span className="text-mono-s text-sb-text-subtle">{events.length} total events</span>
+                </div>
+
+                <div
+                  data-testid="tier-preview-bar"
+                  className="h-3.5 w-full bg-slate-100 rounded-full overflow-hidden flex"
+                >
+                  <div
+                    data-testid="tier-preview-auto-accept"
+                    className="bg-emerald-600 transition-all duration-300"
+                    style={{ width: `${tierCounts.autoAcceptPct}%` }}
+                    title={`Auto-accept: ${tierCounts.autoAccept} events`}
+                  />
+                  <div
+                    data-testid="tier-preview-review"
+                    className="bg-amber-500 transition-all duration-300"
+                    style={{ width: `${tierCounts.reviewPct}%` }}
+                    title={`Review: ${tierCounts.review} events`}
+                  />
+                  <div
+                    data-testid="tier-preview-unmatched"
+                    className="bg-red-500 transition-all duration-300"
+                    style={{ width: `${tierCounts.unmatchedPct}%` }}
+                    title={`Unmatched: ${tierCounts.unmatched} events`}
+                  />
+                </div>
+
+                <div className="grid grid-cols-3 gap-1 text-[11px] pt-1 text-center">
+                  <div className="p-1 rounded bg-emerald-50 text-emerald-900 border border-emerald-200">
+                    <span className="block font-bold">Auto-accept</span>
+                    <span data-testid="tier-count-auto-accept" className="font-mono font-bold">
+                      {tierCounts.autoAccept} events
+                    </span>
+                  </div>
+
+                  <div className="p-1 rounded bg-amber-50 text-amber-900 border border-amber-200">
+                    <span className="block font-bold">Review</span>
+                    <span data-testid="tier-count-review" className="font-mono font-bold">
+                      {tierCounts.review} events
+                    </span>
+                  </div>
+
+                  <div className="p-1 rounded bg-red-50 text-red-900 border border-red-200">
+                    <span className="block font-bold">Unmatched</span>
+                    <span data-testid="tier-count-unmatched" className="font-mono font-bold">
+                      {tierCounts.unmatched} events
+                    </span>
+                  </div>
+                </div>
               </div>
             </div>
-          </div>
+          ) : (
+            /* Normal/Demo Build: Clean Calibrated Tier Summary */
+            <div className="space-y-2.5">
+              <div className="grid grid-cols-3 gap-2 text-caption">
+                <div className="p-2.5 rounded-xl bg-emerald-50/80 border border-emerald-200 text-emerald-900">
+                  <span className="text-[10px] font-bold uppercase block text-emerald-800">Auto-Accept</span>
+                  <span className="font-mono font-bold text-sm text-emerald-900">≥ {autoAcceptThreshold}%</span>
+                  <span className="text-[10px] text-emerald-700 block mt-0.5">High Confidence</span>
+                </div>
+
+                <div className="p-2.5 rounded-xl bg-amber-50/80 border border-amber-200 text-amber-900">
+                  <span className="text-[10px] font-bold uppercase block text-amber-800">Review</span>
+                  <span className="font-mono font-bold text-sm text-amber-900">{reviewThreshold}%–{autoAcceptThreshold - 1}%</span>
+                  <span className="text-[10px] text-amber-700 block mt-0.5">Planner Action</span>
+                </div>
+
+                <div className="p-2.5 rounded-xl bg-red-50/80 border border-red-200 text-red-900">
+                  <span className="text-[10px] font-bold uppercase block text-red-800">Unmatched</span>
+                  <span className="font-mono font-bold text-sm text-red-900">&lt; {reviewThreshold}%</span>
+                  <span className="text-[10px] text-red-700 block mt-0.5">Exception Tier</span>
+                </div>
+              </div>
+            </div>
+          )}
 
           {/* Locked Governance Info Rows */}
           <div className="pt-2 border-t border-sb-border-subtle space-y-1.5">
@@ -234,17 +269,17 @@ export default function SettingsPage() {
               Locked Governance Constraints
             </span>
 
-            <div className="flex items-center gap-2 text-[11px] text-sb-text-subtle bg-sb-bg-subtle p-2 rounded border border-sb-border-subtle">
+            <div className="flex items-center gap-2 text-[11px] text-sb-text-subtle bg-sb-bg-subtle p-2 rounded-lg border border-sb-border-subtle">
               <Lock className="w-3.5 h-3.5 text-sb-text-muted flex-shrink-0" />
               <span>Actual Finish is never auto-accepted</span>
             </div>
 
-            <div className="flex items-center gap-2 text-[11px] text-sb-text-subtle bg-sb-bg-subtle p-2 rounded border border-sb-border-subtle">
+            <div className="flex items-center gap-2 text-[11px] text-sb-text-subtle bg-sb-bg-subtle p-2 rounded-lg border border-sb-border-subtle">
               <Lock className="w-3.5 h-3.5 text-sb-text-muted flex-shrink-0" />
               <span>Progress measure: Physical % complete</span>
             </div>
 
-            <div className="flex items-center gap-2 text-[11px] text-sb-text-subtle bg-sb-bg-subtle p-2 rounded border border-sb-border-subtle">
+            <div className="flex items-center gap-2 text-[11px] text-sb-text-subtle bg-sb-bg-subtle p-2 rounded-lg border border-sb-border-subtle">
               <Lock className="w-3.5 h-3.5 text-sb-text-muted flex-shrink-0" />
               <span>P6 option assumed: Retained Logic</span>
             </div>

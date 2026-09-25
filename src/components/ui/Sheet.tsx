@@ -83,7 +83,7 @@ export const Sheet: React.FC<SheetProps> = ({
                 initial={{ y: '100%' }}
                 animate={{ y: 0 }}
                 exit={{ y: '100%' }}
-                transition={{ type: 'spring', stiffness: 320, damping: 32 }}
+                transition={{ type: 'spring', stiffness: 380, damping: 26, mass: 0.8 }}
                 data-testid={testId}
                 className="fixed bottom-0 left-0 right-0 z-50 mx-auto max-w-md w-full max-h-[90vh] bg-sb-white rounded-t-[28px] shadow-e3 border-t border-sb-border flex flex-col focus:outline-none overflow-hidden pb-safe"
               >

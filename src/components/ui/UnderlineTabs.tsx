@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import { motion } from 'framer-motion';
 
 export interface TabItem {
   id: string;
@@ -44,7 +45,7 @@ export const UnderlineTabs: React.FC<UnderlineTabsProps> = ({
               data-testid={`${testId}-${tab.id}`}
               onClick={() => onChange(tab.id)}
               className={`relative py-3 text-callout font-medium transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-sb-navy focus-visible:outline-offset-2 ${
-                isActive ? 'text-sb-navy font-semibold' : 'text-sb-ink-3 hover:text-sb-ink'
+                isActive ? 'text-sb-navy font-semibold' : 'text-sb-ink-3 hover:text-sb-navy'
               }`}
             >
               <span className="inline-flex items-center gap-1.5">
@@ -56,7 +57,11 @@ export const UnderlineTabs: React.FC<UnderlineTabsProps> = ({
                 )}
               </span>
               {isActive && (
-                <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-sb-navy rounded-t-full" />
+                <motion.span
+                  layoutId="underline-active-indicator"
+                  transition={{ type: 'spring', stiffness: 380, damping: 26, mass: 0.8 }}
+                  className="absolute bottom-0 left-0 right-0 h-0.5 bg-sb-navy rounded-t-full"
+                />
               )}
             </button>
           );

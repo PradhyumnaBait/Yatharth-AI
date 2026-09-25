@@ -1,11 +1,13 @@
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
-import { useRouter } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { PageHeader } from '@/components/shell/PageHeader';
 import { StatusPill } from '@/components/ui/StatusPill';
 import { Waveform } from '@/components/domain/Waveform';
+import { ConfidenceBadge } from '@/components/domain/ConfidenceBadge';
+import { EvidenceChain } from '@/components/domain/EvidenceChain';
 import { Sheet } from '@/components/ui/Sheet';
 import { Toast } from '@/components/ui/Toast';
 import { useEventsStore } from '@/store/events';
@@ -23,12 +25,18 @@ import {
   Clock,
   User,
   ArrowRight,
+  Loader2,
+  AlertCircle,
 } from 'lucide-react';
 
-export default function EventDetailPage({ params }: { params: { id: string } }) {
+export default function EventDetailPage() {
   const router = useRouter();
+  const rawParams = useParams();
+  const eventId = (rawParams?.id as string) || '';
+
+  const [mounted, setMounted] = useState(false);
   const { user } = useAuthStore();
-  const event = useEventsStore((s) => s.events.find((e) => e.id === params.id));
+  const event = useEventsStore((s) => s.events.find((e) => e.id === eventId));
   const askQuestion = useEventsStore((s) => s.askQuestion);
   const replyToQuestion = useEventsStore((s) => s.replyToQuestion);
 
@@ -50,6 +58,10 @@ export default function EventDetailPage({ params }: { params: { id: string } }) 
 
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
   // Audio playback handler (Real blob if available, SpeechSynthesis fallback for fixtures)
   const togglePlayAudio = () => {
     if (isPlaying) {
@@ -65,7 +77,6 @@ export default function EventDetailPage({ params }: { params: { id: string } }) 
 
     if (event?.audioUrl && audioElementRef.current) {
       audioElementRef.current.play();
-      setIsPlaying(true);
     } else if (typeof window !== 'undefined' && window.speechSynthesis && event?.rawText) {
       window.speechSynthesis.cancel();
       const utterance = new SpeechSynthesisUtterance(event.rawText);
@@ -112,18 +123,42 @@ export default function EventDetailPage({ params }: { params: { id: string } }) 
     setToastMessage('Clarification request sent to supervisor.');
   };
 
+  if (!mounted) {
+    return (
+      <div className="flex flex-col min-h-screen bg-sb-bg items-center justify-center p-6 space-y-3">
+        <Loader2 className="w-8 h-8 text-sb-navy animate-spin" />
+        <p className="text-caption text-sb-ink-3">Loading event details...</p>
+      </div>
+    );
+  }
+
   if (!event) {
     return (
-      <div className="flex flex-col min-h-full bg-sb-bg p-6 text-center space-y-3">
+      <div className="flex flex-col min-h-full bg-sb-bg p-6 text-center space-y-4">
         <PageHeader variant="back" title="Event Not Found" />
-        <p className="text-caption text-sb-ink-3">The requested event could not be found.</p>
-        <button
-          type="button"
-          onClick={() => router.back()}
-          className="px-4 py-2 bg-sb-navy text-sb-white rounded-full text-caption font-semibold mx-auto"
-        >
-          Go Back
-        </button>
+        <div className="p-8 bg-sb-white rounded-2xl border border-sb-border max-w-md mx-auto space-y-3">
+          <AlertCircle className="w-8 h-8 text-sb-critical mx-auto" />
+          <h3 className="text-callout font-bold text-sb-navy">Event Not Found</h3>
+          <p className="text-caption text-sb-ink-3">
+            Event &quot;{eventId}&quot; could not be found in the current project log.
+          </p>
+          <div className="flex items-center justify-center gap-2 pt-2">
+            <button
+              type="button"
+              onClick={() => router.back()}
+              className="px-4 py-2 border border-sb-border text-sb-ink rounded-full text-caption font-semibold"
+            >
+              Go Back
+            </button>
+            <button
+              type="button"
+              onClick={() => router.push('/workbench')}
+              className="px-4 py-2 bg-sb-navy text-sb-white rounded-full text-caption font-semibold"
+            >
+              Open Workbench
+            </button>
+          </div>
+        </div>
       </div>
     );
   }
@@ -249,12 +284,11 @@ export default function EventDetailPage({ params }: { params: { id: string } }) 
                 AI Schedule Match
               </h3>
             </div>
-            <span
+            <ConfidenceBadge
+              confidence={event.confidence || 94}
+              showLabel={true}
               data-testid="match-confidence-badge"
-              className="font-mono text-caption font-bold px-2 py-0.5 rounded-full bg-sb-verified-tint text-sb-verified-ink"
-            >
-              {event.confidence}% Confidence
-            </span>
+            />
           </div>
 
           <div className="p-3 bg-sb-bg rounded-xl border border-sb-border space-y-1">
@@ -280,12 +314,19 @@ export default function EventDetailPage({ params }: { params: { id: string } }) 
             </div>
           )}
 
-          {/* Evidence Chain */}
+          {/* Evidence Chain Link */}
           <div className="flex items-center justify-between text-[11px] font-mono text-sb-ink-3 pt-2 border-t border-sb-border/60">
             <span>Evidence Chain:</span>
             <span className="text-sb-navy font-semibold">Voice → Event → Match → Approval</span>
           </div>
         </div>
+
+        {/* 4. Cryptographic Audit Trail Timeline (Scene 7) */}
+        <EvidenceChain
+          event={event}
+          currentStep={event.status === 'Verified' ? 4 : 3}
+          auditEntryId={event.status === 'Verified' ? 'AUD-1281' : 'AUD-1282'}
+        />
 
         {/* 4. Photos if any */}
         {event.thumbnailUrl && (

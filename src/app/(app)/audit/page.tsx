@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { PageHeader } from '@/components/shell/PageHeader';
+import { PageContainer } from '@/components/shell/PageContainer';
 import { useAuditStore } from '@/store/audit';
 import {
   ShieldCheck,
@@ -14,7 +15,7 @@ import {
   ArrowRight,
 } from 'lucide-react';
 
-export default function AuditPage() {
+function AuditPageContent() {
   const chain = useAuditStore((s) => s.chain);
   const isVerifying = useAuditStore((s) => s.isVerifying);
   const verifyResult = useAuditStore((s) => s.verifyResult);
@@ -112,7 +113,12 @@ export default function AuditPage() {
   };
 
   return (
-    <div className="flex flex-col min-h-full pb-8">
+    <PageContainer
+      maxWidth="container"
+      withGutter={false}
+      withVerticalRhythm={false}
+      className="flex flex-col min-h-full pb-8"
+    >
       <PageHeader variant="back" title="Forensic Audit Trail" />
 
       <div className="px-4 py-3 space-y-4">
@@ -132,7 +138,7 @@ export default function AuditPage() {
                 data-testid="verify-chain-button"
                 onClick={handleVerify}
                 disabled={isVerifying}
-                className="px-3.5 py-1.5 bg-sb-navy text-white text-caption font-semibold rounded-lg hover:bg-slate-800 disabled:opacity-50 transition-colors inline-flex items-center gap-1.5"
+                className="px-3.5 py-1.5 bg-sb-navy text-white text-caption font-semibold rounded-lg hover:bg-slate-800 disabled:opacity-50 inline-flex items-center gap-1.5 sb-press-spring cursor-pointer"
               >
                 <ShieldCheck className="w-4 h-4" />
                 {isVerifying ? 'Verifying...' : 'Verify chain'}
@@ -142,7 +148,7 @@ export default function AuditPage() {
                 type="button"
                 data-testid="export-audit-csv"
                 onClick={handleExportCSV}
-                className="p-1.5 border border-sb-border rounded-lg bg-sb-bg-subtle hover:bg-slate-100 text-sb-ink transition-colors"
+                className="p-1.5 border border-sb-border rounded-lg bg-sb-bg-subtle hover:bg-slate-100 text-sb-ink sb-press-spring cursor-pointer"
                 title="Export CSV"
               >
                 <Download className="w-4 h-4" />
@@ -157,7 +163,7 @@ export default function AuditPage() {
               type="button"
               data-testid="tamper-entry-button"
               onClick={handleTamper}
-              className="text-amber-800 hover:text-amber-900 bg-amber-50 hover:bg-amber-100 border border-amber-200 text-[11px] font-semibold px-2.5 py-1 rounded transition-colors inline-flex items-center gap-1"
+              className="text-amber-800 hover:text-amber-900 bg-amber-50 hover:bg-amber-100 border border-amber-200 text-[11px] font-semibold px-2.5 py-1 rounded inline-flex items-center gap-1 sb-press-spring cursor-pointer"
             >
               <AlertTriangle className="w-3 h-3 text-amber-700" />
               Tamper an entry
@@ -199,7 +205,7 @@ export default function AuditPage() {
                   type="button"
                   data-testid="jump-to-break-button"
                   onClick={() => handleJumpToBroken(verifyResult.brokenAtIndex!)}
-                  className="px-2.5 py-1 text-[11px] font-semibold bg-red-700 text-white rounded hover:bg-red-800 transition-colors flex-shrink-0"
+                  className="px-2.5 py-1 text-[11px] font-semibold bg-red-700 text-white rounded hover:bg-red-800 flex-shrink-0 sb-press-spring cursor-pointer"
                 >
                   Jump to entry
                 </button>
@@ -314,6 +320,39 @@ export default function AuditPage() {
           })}
         </div>
       </div>
+    </PageContainer>
+  );
+}
+
+import { Skeleton } from '@/components/ui/Skeleton';
+
+function AuditSkeleton() {
+  return (
+    <div className="flex flex-col min-h-full pb-8 bg-sb-bg" data-testid="audit-skeleton">
+      <div className="h-14 bg-sb-white border-b border-sb-border px-4 flex items-center justify-between">
+        <Skeleton variant="text" width={160} height={20} />
+        <Skeleton variant="avatar" width={32} height={32} />
+      </div>
+      <div className="px-4 py-3 space-y-4">
+        <Skeleton variant="rect" height={110} className="rounded-2xl w-full" />
+        <div className="flex gap-2">
+          <Skeleton variant="pill" width={100} height={32} />
+          <Skeleton variant="pill" width={100} height={32} />
+        </div>
+        <div className="space-y-2.5">
+          <Skeleton variant="row" height={90} className="rounded-xl" />
+          <Skeleton variant="row" height={90} className="rounded-xl" />
+          <Skeleton variant="row" height={90} className="rounded-xl" />
+        </div>
+      </div>
     </div>
+  );
+}
+
+export default function AuditPage() {
+  return (
+    <React.Suspense fallback={<AuditSkeleton />}>
+      <AuditPageContent />
+    </React.Suspense>
   );
 }

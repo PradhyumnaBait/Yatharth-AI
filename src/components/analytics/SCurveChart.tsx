@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useId, useMemo } from 'react';
+import React, { useState, useId, useMemo, useEffect } from 'react';
 import { scaleTime, scaleLinear } from 'd3-scale';
 import { line, curveMonotoneX } from 'd3-shape';
 
@@ -14,7 +14,14 @@ interface DataPoint {
 export const SCurveChart: React.FC = () => {
   const [range, setRange] = useState<'weekly' | 'monthly'>('weekly');
   const [scrubberIndex, setScrubberIndex] = useState<number | null>(null);
+  const [isRendered, setIsRendered] = useState(false);
   const chartId = useId();
+
+  useEffect(() => {
+    setIsRendered(false);
+    const timer = setTimeout(() => setIsRendered(true), 20);
+    return () => clearTimeout(timer);
+  }, [range]);
 
   // Weekly data points centered around Data Date (20 Sep 2026)
   const weeklyData: DataPoint[] = useMemo(
@@ -80,24 +87,25 @@ export const SCurveChart: React.FC = () => {
   const plannedPath = plannedLineGenerator(data) || '';
   const actualPath = actualLineGenerator(actualData) || '';
 
-  // Data date line x position
+  // Data date line x position (Today = 20 Sep 2026)
   const dataDateObj = new Date(2026, 8, 20);
   const dataDateX = xScale(dataDateObj);
 
   // Current active point for scrubber
-  const activeIndex = scrubberIndex !== null ? scrubberIndex : 7; // default to 20 Sep (index 7 in weekly)
+  const activeIndex = scrubberIndex !== null ? scrubberIndex : (range === 'weekly' ? 7 : 4);
   const activePoint = data[Math.min(activeIndex, data.length - 1)];
 
   return (
-    <div className="bg-white rounded-card border border-sb-border p-4 shadow-e1">
+    <div className="bg-white rounded-2xl border border-sb-border p-4 shadow-e1 animate-in fade-in duration-300">
+      {/* Header & Controls */}
       <div className="flex items-center justify-between mb-3">
         <div>
-          <h3 className="text-body font-semibold text-sb-ink">Cumulative Progress (S-Curve)</h3>
-          <p className="text-caption text-sb-text-muted">Physical % against baseline</p>
+          <h3 className="text-callout font-bold text-sb-navy">Cumulative Progress (S-Curve)</h3>
+          <p className="text-[11px] text-sb-ink-3 font-mono">Planned / Actual / Today Timeline</p>
         </div>
 
         {/* Range Toggle */}
-        <div className="inline-flex rounded-lg border border-sb-border p-0.5 bg-sb-bg-subtle text-caption font-medium">
+        <div className="inline-flex rounded-full border border-sb-border p-0.5 bg-sb-bg-subtle text-caption font-medium">
           <button
             type="button"
             data-testid="range-weekly"
@@ -105,10 +113,10 @@ export const SCurveChart: React.FC = () => {
               setRange('weekly');
               setScrubberIndex(null);
             }}
-            className={`px-2.5 py-1 rounded-md transition-colors ${
+            className={`px-2.5 py-1 rounded-full uppercase text-[11px] font-mono font-bold transition-all ${
               range === 'weekly'
-                ? 'bg-sb-navy text-white shadow-sm'
-                : 'text-sb-text-subtle hover:text-sb-ink'
+                ? 'bg-sb-navy text-white shadow-2xs'
+                : 'text-sb-ink-3 hover:text-sb-navy'
             }`}
           >
             Weekly
@@ -120,10 +128,10 @@ export const SCurveChart: React.FC = () => {
               setRange('monthly');
               setScrubberIndex(null);
             }}
-            className={`px-2.5 py-1 rounded-md transition-colors ${
+            className={`px-2.5 py-1 rounded-full uppercase text-[11px] font-mono font-bold transition-all ${
               range === 'monthly'
-                ? 'bg-sb-navy text-white shadow-sm'
-                : 'text-sb-text-subtle hover:text-sb-ink'
+                ? 'bg-sb-navy text-white shadow-2xs'
+                : 'text-sb-ink-3 hover:text-sb-navy'
             }`}
           >
             Monthly
@@ -131,24 +139,35 @@ export const SCurveChart: React.FC = () => {
         </div>
       </div>
 
-      {/* Legend & Tooltip Header */}
-      <div className="flex items-center justify-between text-caption px-1 mb-2 bg-sb-bg-subtle py-1.5 px-3 rounded-card">
-        <div className="flex items-center gap-4">
+      {/* Clean Single Legend & Scrubber Readout */}
+      <div className="flex items-center justify-between text-caption px-3 py-1.5 mb-3 bg-sb-bg-subtle rounded-xl border border-sb-border/50">
+        <div className="flex items-center gap-3">
           <div className="flex items-center gap-1.5">
-            <span className="w-3 h-0.5 bg-sb-navy inline-block rounded-full" />
-            <span className="text-sb-ink font-medium">Actual ({activePoint.actual !== undefined ? `${activePoint.actual}%` : '—'})</span>
+            <span className="w-3 h-1 bg-sb-navy inline-block rounded-full" />
+            <span className="text-[11px] text-sb-navy font-bold font-mono">
+              Actual {activePoint.actual !== undefined ? `${activePoint.actual}%` : '—'}
+            </span>
           </div>
           <div className="flex items-center gap-1.5">
-            <span className="w-3 h-0.5 bg-sb-border-focus inline-block rounded-full" />
-            <span className="text-sb-text-subtle">Planned ({activePoint.planned}%)</span>
+            <span className="w-3 h-1 bg-slate-400 inline-block rounded-full" />
+            <span className="text-[11px] text-sb-ink-3 font-mono">
+              Plan {activePoint.planned}%
+            </span>
+          </div>
+          <div className="flex items-center gap-1.5">
+            <span className="w-1.5 h-1.5 rounded-full bg-amber-600 inline-block" />
+            <span className="text-[11px] text-amber-800 font-mono font-bold">
+              Today
+            </span>
           </div>
         </div>
-        <span className="text-mono-s font-medium text-sb-navy">
+
+        <span className="text-[11px] font-mono font-bold text-sb-navy bg-white px-2 py-0.5 rounded-md border border-sb-border/60 shadow-2xs">
           {activePoint.dateStr} 2026
         </span>
       </div>
 
-      {/* Hand-built SVG Chart */}
+      {/* Hand-built SVG Chart with Progressive Draw-in Animation & Minimal Gridlines */}
       <div className="relative select-none touch-none">
         <svg
           width="100%"
@@ -176,9 +195,32 @@ export const SCurveChart: React.FC = () => {
           role="img"
           aria-label="Progress S-curve chart"
         >
+          <defs>
+            <style>{`
+              @keyframes drawProgressLine {
+                from {
+                  stroke-dashoffset: 600;
+                }
+                to {
+                  stroke-dashoffset: 0;
+                }
+              }
+              @keyframes drawTodayLine {
+                from {
+                  opacity: 0;
+                  transform: scaleY(0);
+                }
+                to {
+                  opacity: 1;
+                  transform: scaleY(1);
+                }
+              }
+            `}</style>
+          </defs>
+
           <g transform={`translate(${margin.left}, ${margin.top})`}>
-            {/* Horizontal Gridlines */}
-            {[0, 25, 50, 75, 100].map((val) => (
+            {/* Minimal Background Baseline & Target Gridlines (Only 0%, 50%, 100% to remove clutter) */}
+            {[0, 50, 100].map((val) => (
               <g key={`${chartId}-grid-${val}`}>
                 <line
                   x1={0}
@@ -186,54 +228,82 @@ export const SCurveChart: React.FC = () => {
                   y1={yScale(val)}
                   y2={yScale(val)}
                   stroke="#E2E8F0"
-                  strokeDasharray="2,2"
-                  strokeWidth={1}
+                  strokeWidth={val === 0 ? 1.5 : 0.8}
+                  strokeDasharray={val === 50 ? '3,3' : undefined}
                 />
                 <text
                   x={-6}
                   y={yScale(val) + 3}
                   textAnchor="end"
-                  className="fill-sb-text-subtle text-[10px] font-mono"
+                  className="fill-sb-ink-3 text-[10px] font-mono"
                 >
                   {val}%
                 </text>
               </g>
             ))}
 
-            {/* Planned Line (Grey / border-focus) */}
+            {/* Planned Line (Grey / dashed) with Progressive Draw-in */}
             <path
               d={plannedPath}
               fill="none"
               stroke="#94A3B8"
               strokeWidth={2}
-              strokeDasharray="4,3"
+              strokeDasharray="4,4"
+              style={{
+                strokeDashoffset: isRendered ? 0 : 600,
+                transition: 'stroke-dashoffset 900ms ease-out',
+              }}
             />
 
-            {/* Actual Line (Navy) */}
+            {/* Actual Line (Navy) with Progressive Draw-in */}
             <path
               d={actualPath}
               fill="none"
               stroke="#14213D"
-              strokeWidth={2.5}
+              strokeWidth={2.75}
+              strokeLinecap="round"
+              style={{
+                strokeDasharray: 600,
+                strokeDashoffset: isRendered ? 0 : 600,
+                transition: 'stroke-dashoffset 1100ms cubic-bezier(0.16, 1, 0.3, 1)',
+              }}
             />
 
-            {/* Data Date Line (20 Sep 2026) */}
-            <line
-              x1={dataDateX}
-              x2={dataDateX}
-              y1={0}
-              y2={innerHeight}
-              stroke="#D97706"
-              strokeWidth={1.5}
-            />
-            <text
-              x={dataDateX}
-              y={-6}
-              textAnchor="middle"
-              className="fill-amber-700 text-[10px] font-semibold"
+            {/* Today Line (Vertical marker with progressive reveal) */}
+            <g
+              style={{
+                opacity: isRendered ? 1 : 0,
+                transition: 'opacity 600ms ease-out 500ms',
+              }}
             >
-              Data Date
-            </text>
+              <line
+                x1={dataDateX}
+                x2={dataDateX}
+                y1={0}
+                y2={innerHeight}
+                stroke="#D97706"
+                strokeWidth={1.5}
+                strokeDasharray="2,2"
+              />
+              <rect
+                x={dataDateX - 22}
+                y={-14}
+                width={44}
+                height={14}
+                rx={4}
+                fill="#FEF3C7"
+                stroke="#F59E0B"
+                strokeWidth={0.75}
+              />
+              <text
+                x={dataDateX}
+                y={-4}
+                textAnchor="middle"
+                className="fill-amber-900 text-[9px] font-mono font-bold uppercase"
+              >
+                Today
+              </text>
+            </g>
 
             {/* Scrubber indicator */}
             {activePoint && (
@@ -246,15 +316,17 @@ export const SCurveChart: React.FC = () => {
                   stroke="#14213D"
                   strokeWidth={1}
                   strokeDasharray="2,2"
+                  opacity={0.6}
                 />
                 {activePoint.actual !== undefined && (
                   <circle
                     cx={xScale(activePoint.date)}
                     cy={yScale(activePoint.actual)}
-                    r={4}
+                    r={4.5}
                     fill="#14213D"
                     stroke="#FFFFFF"
                     strokeWidth={2}
+                    className="transition-all duration-150"
                   />
                 )}
                 <circle
@@ -264,6 +336,7 @@ export const SCurveChart: React.FC = () => {
                   fill="#94A3B8"
                   stroke="#FFFFFF"
                   strokeWidth={1.5}
+                  className="transition-all duration-150"
                 />
               </g>
             )}
@@ -275,9 +348,9 @@ export const SCurveChart: React.FC = () => {
                 <text
                   key={`${chartId}-x-${i}`}
                   x={xScale(d.date)}
-                  y={innerHeight + 18}
+                  y={innerHeight + 16}
                   textAnchor="middle"
-                  className="fill-sb-text-subtle text-[10px] font-mono"
+                  className="fill-sb-ink-3 text-[10px] font-mono"
                 >
                   {d.dateStr}
                 </text>

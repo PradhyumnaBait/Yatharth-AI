@@ -8,7 +8,9 @@ export const tailwindTheme: NonNullable<Config['theme']>['extend'] = {
       'navy-tint': 'var(--sb-navy-tint)',
       white: 'var(--sb-white)',
       bg: 'var(--sb-bg)',
+      'bg-subtle': 'var(--sb-bg-subtle)',
       border: 'var(--sb-border)',
+      'border-subtle': 'var(--sb-border-subtle)',
       ink: 'var(--sb-ink)',
       'ink-2': 'var(--sb-ink-2)',
       'ink-3': 'var(--sb-ink-3)',
@@ -25,15 +27,19 @@ export const tailwindTheme: NonNullable<Config['theme']>['extend'] = {
     },
   },
   spacing: {
+    'sb-0.5': 'var(--sb-space-0-5)',
     'sb-1': 'var(--sb-space-1)',
+    'sb-1.5': 'var(--sb-space-1-5)',
     'sb-2': 'var(--sb-space-2)',
+    'sb-2.5': 'var(--sb-space-2-5)',
     'sb-3': 'var(--sb-space-3)',
     'sb-3.5': 'var(--sb-space-3-5)',
     'sb-4': 'var(--sb-space-4)',
     'sb-5': 'var(--sb-space-5)',
     'sb-6': 'var(--sb-space-6)',
-    'sb-7': 'var(--sb-space-7)',
     'sb-8': 'var(--sb-space-8)',
+    'sb-gutter': 'var(--sb-gutter-mobile)',
+    'sb-gutter-lg': 'var(--sb-gutter-desktop)',
   },
   borderRadius: {
     sheet: 'var(--sb-radius-sheet)',
@@ -41,6 +47,14 @@ export const tailwindTheme: NonNullable<Config['theme']>['extend'] = {
     tile: 'var(--sb-radius-tile)',
     thumb: 'var(--sb-radius-thumb)',
     pill: 'var(--sb-radius-pill)',
+    'sb-sheet': 'var(--sb-radius-sheet)',
+    'sb-card': 'var(--sb-radius-card)',
+    'sb-tile': 'var(--sb-radius-tile)',
+    'sb-thumb': 'var(--sb-radius-thumb)',
+    'sb-pill': 'var(--sb-radius-pill)',
+  },
+  maxWidth: {
+    'sb-container': 'var(--sb-container-max)',
   },
   boxShadow: {
     e1: 'var(--sb-shadow-e1)',
@@ -63,8 +77,27 @@ export const tailwindTheme: NonNullable<Config['theme']>['extend'] = {
     callout: ['14px', { lineHeight: '20px', letterSpacing: '0', fontWeight: '500' }],
     caption: ['12px', { lineHeight: '16px', letterSpacing: '0', fontWeight: '400' }],
     'caption-500': ['12px', { lineHeight: '16px', letterSpacing: '0', fontWeight: '500' }],
-    'panel-label': ['11px', { lineHeight: '14px', letterSpacing: '0.04em', fontWeight: '600' }],
     'mono-m': ['13px', { lineHeight: '18px', letterSpacing: '0', fontWeight: '500' }],
     'mono-s': ['12px', { lineHeight: '16px', letterSpacing: '0', fontWeight: '500' }],
+  },
+  transitionDuration: {
+    'sb-standard': 'var(--sb-duration-standard)',
+    'sb-spring': 'var(--sb-duration-spring)',
+  },
+  transitionTimingFunction: {
+    'sb-standard': 'var(--sb-ease-standard)',
+    'sb-spring': 'var(--sb-ease-spring)',
+  },
+  transitionProperty: {
+    'transform-opacity': 'transform, opacity',
+  },
+  keyframes: {
+    'sb-shimmer': {
+      '0%': { backgroundPosition: '-200% 0' },
+      '100%': { backgroundPosition: '200% 0' },
+    },
+  },
+  animation: {
+    'sb-shimmer': 'sb-shimmer 1.5s infinite ease-in-out',
   },
 };

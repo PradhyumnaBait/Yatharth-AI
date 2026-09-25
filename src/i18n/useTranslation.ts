@@ -3,15 +3,21 @@
 import { useUiStore } from '@/store/ui';
 import en from './en.json';
 import hi from './hi.json';
+import mr from './mr.json';
+import gu from './gu.json';
 
 type Dictionaries = {
   en: typeof en;
   hi: typeof hi;
+  mr: typeof mr;
+  gu: typeof gu;
 };
 
 const dictionaries: Dictionaries = {
   en,
   hi,
+  mr,
+  gu,
 };
 
 // Recursive key path helper

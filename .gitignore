@@ -58,3 +58,6 @@ backend/*.sqlite3
 .env.local
 .env.*.local
 
+# Playwright & Test Artifacts
+playwright-report/
+test-results/

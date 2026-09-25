@@ -1,11 +1,18 @@
 :root {
-  /* Color Tokens - SPEC §4.1 */
+  /* ==========================================================================
+     SCHEDBRIDGE AI DESIGN SYSTEM TOKENS (ONE SOURCE OF TRUTH)
+     SPEC §4 — Colors, Radii, 8px-Baseline Spacing, Shadows, & Typography
+     ========================================================================== */
+
+  /* 1. Core & Semantic Color Palette */
   --sb-navy: #14213D;
   --sb-navy-pressed: #0D162B;
   --sb-navy-tint: #E8ECF3;
   --sb-white: #FFFFFF;
   --sb-bg: #F4F6F8;
+  --sb-bg-subtle: #ECEFF3;
   --sb-border: #E7EBF0;
+  --sb-border-subtle: #DDE2E8;
   --sb-ink: #14213D;
   --sb-ink-2: #4A5468;
   --sb-ink-3: #6B7485;
@@ -23,36 +30,52 @@
   --sb-critical-ink: #C42B21;
   --sb-critical-tint: #FFECEA;
 
-  /* Photo Flat Scrim */
+  /* Photo & Overlay Scrim */
   --sb-scrim: rgba(20, 33, 61, 0.28);
 
-  /* Spacing Scale - 4-pt grid (SPEC §4.3) */
-  --sb-space-1: 4px;
-  --sb-space-2: 8px;
-  --sb-space-3: 12px;
-  --sb-space-3-5: 14px;
-  --sb-space-4: 16px;
-  --sb-space-5: 20px;
-  --sb-space-6: 24px;
-  --sb-space-7: 28px;
-  --sb-space-8: 32px;
-
-  /* Radii Tokens - SPEC §4.3 */
+  /* 2. Border Radii Scale (28px / 20px / 16px / 12px / 9999px) */
   --sb-radius-sheet: 28px;
   --sb-radius-card: 20px;
   --sb-radius-tile: 16px;
   --sb-radius-thumb: 12px;
   --sb-radius-pill: 9999px;
 
-  /* Shadows - Elevation Levels (SPEC §4.3, No gradients) */
+  /* 3. 8px-Baseline Spacing Grid */
+  --sb-space-0-5: 4px;   /* 0.5 unit (half-step) */
+  --sb-space-1: 8px;     /* 1 unit */
+  --sb-space-1-5: 12px;  /* 1.5 units */
+  --sb-space-2: 16px;    /* 2 units (standard gutter) */
+  --sb-space-2-5: 20px;  /* 2.5 units */
+  --sb-space-3: 24px;    /* 3 units (section gap) */
+  --sb-space-3-5: 28px;  /* 3.5 units */
+  --sb-space-4: 32px;    /* 4 units */
+  --sb-space-5: 40px;    /* 5 units */
+  --sb-space-6: 48px;    /* 6 units */
+  --sb-space-8: 64px;    /* 8 units */
+
+  /* Container & Layout Metrics */
+  --sb-container-max: 1280px;
+  --sb-gutter-mobile: 16px;
+  --sb-gutter-desktop: 24px;
+
+  /* 4. Elevation Shadows (Crisp industrial elevation) */
   --sb-shadow-e1: 0 1px 2px rgba(20, 33, 61, 0.04);
   --sb-shadow-e2: 0 6px 20px rgba(20, 33, 61, 0.06);
   --sb-shadow-e3: 0 10px 30px rgba(20, 33, 61, 0.14);
 
-  /* Typography Stacks - SPEC §4.2 */
+  /* 5. Typography Stacks */
   --font-ui: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", var(--font-inter), system-ui, sans-serif;
   --font-mono: "SF Mono", ui-monospace, var(--font-jetbrains-mono), Menlo, monospace;
   --font-hero-num: var(--font-ui);
+  /* 6. Motion & Animation Tokens (Standard 240ms, Spring 400ms) */
+  --sb-duration-standard: 240ms;
+  --sb-duration-spring: 400ms;
+  --sb-ease-standard: cubic-bezier(0.4, 0, 0.2, 1);
+  --sb-ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --sb-transition-standard: all var(--sb-duration-standard) var(--sb-ease-standard);
+  --sb-transition-transform-standard: transform var(--sb-duration-standard) var(--sb-ease-standard), opacity var(--sb-duration-standard) var(--sb-ease-standard);
+  --sb-transition-spring: all var(--sb-duration-spring) var(--sb-ease-spring);
+  --sb-transition-transform-spring: transform var(--sb-duration-spring) var(--sb-ease-spring), opacity var(--sb-duration-standard) var(--sb-ease-standard);
 }
 
 /* Global Tabular Figures */
@@ -69,7 +92,7 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* Accessible Focus-Visible Ring (2px navy, 2px white offset) */
+/* Accessible Focus-Visible Ring */
 :focus-visible {
   outline: 2px solid var(--sb-navy);
   outline-offset: 2px;
@@ -89,17 +112,75 @@ body {
   padding-right: env(safe-area-inset-right, 0px);
 }
 
-/* Reduced Motion Handling - SPEC §4.6 */
+/* ==========================================================================
+   MOTION & INTERACTION UTILITIES
+   Hardware-accelerated transforms & opacity, with reduced-motion fallbacks
+   ========================================================================== */
+
+/* Standard GPU-accelerated transition (240ms) */
+.sb-transition-standard {
+  transition: transform var(--sb-duration-standard) var(--sb-ease-standard),
+              opacity var(--sb-duration-standard) var(--sb-ease-standard);
+  will-change: transform, opacity;
+}
+
+/* Bouncy / Spring transition for confirmations, tab selection, success moments (400ms) */
+.sb-transition-spring {
+  transition: transform var(--sb-duration-spring) var(--sb-ease-spring),
+              opacity var(--sb-duration-standard) var(--sb-ease-standard);
+  will-change: transform, opacity;
+}
+
+/* Reusable Press-Feedback Utility: Scale to ~0.96 on active/press, spring back on release */
+.sb-press-spring {
+  transition: transform var(--sb-duration-spring) var(--sb-ease-spring),
+              opacity var(--sb-duration-standard) var(--sb-ease-standard);
+  will-change: transform;
+}
+.sb-press-spring:active {
+  transform: scale(0.96);
+}
+
+/* Reusable Skeleton / Shimmer Animation */
+@keyframes sb-shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.sb-skeleton-shimmer {
+  background: linear-gradient(
+    90deg,
+    rgba(231, 235, 240, 0.8) 0%,
+    rgba(255, 255, 255, 0.9) 50%,
+    rgba(231, 235, 240, 0.8) 100%
+  );
+  background-size: 200% 100%;
+  animation: sb-shimmer 1.5s infinite ease-in-out;
+  will-change: background-position;
+}
+
+/* Reduced Motion Handling */
 @media (prefers-reduced-motion: reduce) {
   *, ::before, ::after {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
-    transition-duration: 120ms !important;
+    transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
+  }
+  .sb-press-spring:active {
+    transform: none !important;
+  }
+  .sb-skeleton-shimmer {
+    animation: none !important;
+    background: var(--sb-border) !important;
   }
 }
 
-/* Large Text Accessibility Setting - SPEC §7.5 */
+/* Large Text Accessibility Setting */
 html[data-text-size="large"] {
   font-size: 112.5%;
 }

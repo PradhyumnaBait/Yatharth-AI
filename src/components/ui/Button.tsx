@@ -30,25 +30,25 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
 
     let variantStyles = '';
     if (variant === 'primary') {
-      variantStyles = 'bg-sb-navy text-sb-white hover:bg-sb-navy-pressed active:bg-sb-navy-pressed active:scale-[0.98] border-transparent';
+      variantStyles = 'bg-sb-navy text-sb-white hover:bg-sb-navy-pressed active:bg-sb-navy-pressed border-transparent';
     } else if (variant === 'outline') {
-      variantStyles = 'bg-sb-white text-sb-navy border border-sb-navy hover:bg-sb-navy-tint active:bg-sb-navy-tint active:scale-[0.98]';
+      variantStyles = 'bg-sb-white text-sb-navy border border-sb-navy hover:bg-sb-navy-tint active:bg-sb-navy-tint';
     } else if (variant === 'destructive-outline') {
-      variantStyles = 'bg-sb-white text-sb-critical-ink border border-sb-critical hover:bg-sb-critical-tint active:bg-sb-critical-tint active:scale-[0.98]';
+      variantStyles = 'bg-sb-white text-sb-critical-ink border border-sb-critical hover:bg-sb-critical-tint active:bg-sb-critical-tint';
     } else if (variant === 'ghost') {
-      variantStyles = 'bg-transparent text-sb-navy hover:bg-sb-navy-tint active:bg-sb-navy-tint active:scale-[0.98] border-transparent';
+      variantStyles = 'bg-transparent text-sb-navy hover:bg-sb-navy-tint active:bg-sb-navy-tint border-transparent';
     }
 
     const disabledStyles = disabled || loading
-      ? 'opacity-40 cursor-not-allowed pointer-events-none active:scale-100'
-      : '';
+      ? 'opacity-40 cursor-not-allowed pointer-events-none'
+      : 'sb-press-spring cursor-pointer';
 
     return (
       <button
         ref={ref}
         data-testid={testId}
         disabled={disabled || loading}
-        className={`relative inline-flex items-center justify-center rounded-full px-6 text-callout font-semibold transition-[transform,background-color] duration-90 focus-visible:outline focus-visible:outline-2 focus-visible:outline-sb-navy focus-visible:outline-offset-2 ${heightClass} ${variantStyles} ${disabledStyles} ${className}`}
+        className={`relative inline-flex items-center justify-center rounded-full px-6 text-callout font-semibold focus-visible:outline focus-visible:outline-2 focus-visible:outline-sb-navy focus-visible:outline-offset-2 ${heightClass} ${variantStyles} ${disabledStyles} ${className}`}
         {...props}
       >
         {loading && (

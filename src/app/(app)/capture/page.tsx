@@ -5,7 +5,6 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import {
   X,
   Mic,
-  MicOff,
   Type,
   Globe,
   Clock,
@@ -15,7 +14,10 @@ import {
   Home,
   ChevronRight,
   Loader2,
+  Sparkles,
+  Volume2,
 } from 'lucide-react';
+import { PageContainer } from '@/components/shell/PageContainer';
 import { LiveAudioWaveform } from '@/components/capture/LiveAudioWaveform';
 import { ClarificationCard } from '@/components/capture/ClarificationCard';
 import { ConfirmReportCard } from '@/components/capture/ConfirmReportCard';
@@ -33,7 +35,6 @@ type CaptureState =
   | 'idle'
   | 'listening'
   | 'transcribing'
-  | 'transcript'
   | 'clarify'
   | 'confirm'
   | 'submitting'
@@ -42,23 +43,23 @@ type CaptureState =
 
 const EXAMPLE_CHIPS = [
   {
-    label: 'Spool 17 welding done',
-    text: 'Line 24-XX ki spool 17 welding complete ho gayi hai.',
+    label: 'Spool 17 erection at Rack 4 (Golden Demo)',
+    text: 'Spool 17 erection completed at Rack 4. Hydrotest prep team standing by.',
   },
   {
-    label: 'Trenching 200 m at KP 184.2',
-    text: 'KP 184.2 pe do sau meter trenching ho gayi.',
-  },
-  {
-    label: 'Crane not available, lowering stopped',
-    text: 'Kal se crane nahi aayi, lowering ruka hua hai.',
-  },
-  {
-    label: 'Spool 18 complete',
+    label: 'Line 24-XX Spool 18 welding',
     text: 'Line 24-XX ki spool 18 welding complete ho gayi hai.',
   },
   {
-    label: 'Spool erection finished (Needs clarify)',
+    label: 'Trenching 200m at KP 184.2',
+    text: 'KP 184.2 pe do sau meter trenching ho gayi.',
+  },
+  {
+    label: 'Crane unavailable delay',
+    text: 'Kal se crane nahi aayi, lowering ruka hua hai.',
+  },
+  {
+    label: 'Spool erection (Needs clarify)',
     text: 'Spool erection finished.',
   },
 ] as const;
@@ -175,14 +176,25 @@ function CapturePageContent() {
 
   // Stop recording and trigger transcribing
   const stopRecording = () => {
-    if (mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive') {
-      mediaRecorderRef.current.stop();
+    const wasRecording = mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive';
+    if (wasRecording) {
+      mediaRecorderRef.current?.stop();
     }
     if (stream) {
       stream.getTracks().forEach((t) => t.stop());
       setStream(null);
     }
     setState('transcribing');
+
+    if (!wasRecording) {
+      // Simulate 700ms transcription latency when microphone was unavailable
+      setTimeout(() => {
+        const defaultText = prefilledActivity
+          ? `Activity ${prefilledActivity} field progress completed.`
+          : 'Spool 17 erection completed at Rack 4. Hydrotest prep team standing by.';
+        processText(defaultText);
+      }, 700);
+    }
   };
   stopRecordingRef.current = stopRecording;
 
@@ -197,6 +209,7 @@ function CapturePageContent() {
       setClarificationQuestion(question);
       setState('clarify');
     } else {
+      setClarificationQuestion(null);
       setState('confirm');
     }
   };
@@ -230,10 +243,11 @@ function CapturePageContent() {
   // Manual Type Instead submit
   const handleTypeSubmit = () => {
     if (!typeText.trim()) return;
+    const input = typeText.trim();
+    setTypeText('');
     setState('transcribing');
     setTimeout(() => {
-      processText(typeText.trim());
-      setTypeText('');
+      processText(input);
     }, 500);
   };
 
@@ -281,11 +295,15 @@ function CapturePageContent() {
           authorCrew: 'Welding Crew B',
           status: finalInfo.status === 'Delay' ? 'Delay' : 'Review',
           queueTier: finalInfo.status === 'Delay' ? 'Delay' : 'Review',
-          confidence: match.confidence,
+          confidence: match.confidence || 94,
           suggestedActivityId: match.activityId || prefilledActivity || 'PIP-24-017',
           suggestedActivityName: match.activityName || 'Weld Piping System 24-XX',
           extractedInfo: finalInfo,
-          reasons: match.reasons,
+          reasons: match.reasons || [
+            'Discipline Match: Piping WBS KP3.PIPING.RACK4',
+            'Location Alignment: Rack 4 corresponds to Section 4B active chainage',
+            'Precedence Check: Predecessor activity PIP-24-016 verified complete',
+          ],
           audioUrl: audioUrl || undefined,
           thumbnailUrl: photos[0] || undefined,
           delayCategory,
@@ -317,7 +335,7 @@ function CapturePageContent() {
       data-testid="capture-modal-su2"
       className="fixed inset-0 z-50 bg-sb-navy text-sb-white flex flex-col justify-between overflow-y-auto select-none"
     >
-      {/* 1. Header Bar */}
+      {/* 1. Top Header Bar */}
       <div className="w-full flex items-center justify-between p-4 border-b border-sb-white/10 shrink-0">
         <button
           type="button"
@@ -366,8 +384,13 @@ function CapturePageContent() {
         </div>
       </div>
 
-      {/* 2. Main Interactive Body based on state */}
-      <div className="flex-1 flex flex-col items-center justify-center p-5 max-w-[420px] w-full mx-auto">
+      {/* 2. Main Visual Stream Body */}
+      <PageContainer
+        maxWidth="sm"
+        withGutter={false}
+        withVerticalRhythm={false}
+        className="flex-1 flex flex-col items-center justify-center p-4 max-w-[420px] w-full mx-auto"
+      >
         {/* STATE: IDLE */}
         {state === 'idle' && (
           <div className="flex flex-col items-center justify-center space-y-6 text-center animate-in fade-in w-full">
@@ -380,14 +403,14 @@ function CapturePageContent() {
               </p>
             </div>
 
-            {/* Big 88px Navy/White Mic Button */}
+            {/* Big 96px Mic Button */}
             <div className="relative my-2">
               <div className="absolute inset-0 rounded-full bg-sb-white/10 animate-ping opacity-30" />
               <button
                 type="button"
                 data-testid="big-mic-record-btn"
                 onClick={startRecording}
-                className="relative w-24 h-24 rounded-full bg-sb-white text-sb-navy hover:bg-sb-white/90 active:scale-95 transition-all flex items-center justify-center shadow-e3 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-sb-white/40"
+                className="relative w-24 h-24 rounded-full bg-sb-white text-sb-navy hover:bg-sb-white/90 sb-press-spring flex items-center justify-center shadow-e3 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-sb-white/40 cursor-pointer"
                 aria-label="Start recording"
               >
                 <Mic className="w-10 h-10" />
@@ -402,7 +425,7 @@ function CapturePageContent() {
                   data-testid="type-input-field"
                   value={typeText}
                   onChange={(e) => setTypeText(e.target.value)}
-                  placeholder="e.g. Line 24-XX ki spool 18 welding complete ho gayi..."
+                  placeholder="e.g. Spool 17 erection completed at Rack 4..."
                   className="w-full h-11 px-3.5 bg-sb-white text-sb-navy rounded-xl text-caption placeholder:text-sb-ink-3 focus:outline-none"
                   onKeyDown={(e) => e.key === 'Enter' && handleTypeSubmit()}
                 />
@@ -417,7 +440,7 @@ function CapturePageContent() {
               </div>
             )}
 
-            {/* 3 Example Chips */}
+            {/* Quick Example Chips */}
             <div className="w-full space-y-2 pt-2">
               <div className="text-[11px] font-mono uppercase tracking-wider text-sb-white/50">
                 Quick Examples
@@ -440,11 +463,11 @@ function CapturePageContent() {
           </div>
         )}
 
-        {/* STATE: LISTENING */}
+        {/* STATE: LISTENING (Waveform + Active Recording) */}
         {state === 'listening' && (
           <div className="flex flex-col items-center justify-center space-y-6 text-center animate-in fade-in w-full">
             <div className="space-y-1">
-              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-sb-critical text-sb-white text-[12px] font-mono font-bold animate-pulse">
+              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-sb-critical text-sb-white text-[12px] font-mono font-bold animate-pulse shadow-sm">
                 <span className="w-2 h-2 rounded-full bg-sb-white" />
                 <span>REC · {formatTimer(elapsedSeconds)} / 01:00</span>
               </div>
@@ -452,31 +475,34 @@ function CapturePageContent() {
                 Listening to your update...
               </h2>
               <p className="text-caption text-sb-white/70">
-                Speak clearly into your phone. Tap mic when finished.
+                Speak clearly. Mention spool number, rack, line, and status.
               </p>
             </div>
 
-            {/* Live Audio Waveform (Web Audio AnalyserNode) */}
-            <div className="w-full max-w-[280px] bg-sb-white/10 rounded-2xl p-4 border border-sb-white/10">
+            {/* Live Audio Waveform */}
+            <div className="w-full max-w-[300px] bg-sb-white/10 rounded-2xl p-4 border border-sb-white/15 shadow-inner">
               <LiveAudioWaveform stream={stream} isRecording={true} />
             </div>
 
-            {/* Tap mic to stop */}
-            <button
-              type="button"
-              data-testid="stop-recording-btn"
-              onClick={stopRecording}
-              className="w-20 h-20 rounded-full bg-sb-critical text-sb-white hover:bg-sb-critical/90 active:scale-95 transition-all flex items-center justify-center shadow-e3 focus-visible:outline-none ring-4 ring-sb-critical/30"
-              aria-label="Stop recording"
-            >
-              <div className="w-6 h-6 rounded bg-sb-white" />
-            </button>
+            {/* Stop Recording Button */}
+            <div className="flex flex-col items-center gap-3">
+              <button
+                type="button"
+                data-testid="stop-recording-btn"
+                onClick={stopRecording}
+                className="w-20 h-20 rounded-full bg-sb-critical text-sb-white hover:bg-sb-critical/90 active:scale-95 transition-all flex items-center justify-center shadow-e3 focus-visible:outline-none ring-4 ring-sb-critical/40"
+                aria-label="Stop recording"
+              >
+                <div className="w-6 h-6 rounded bg-sb-white" />
+              </button>
+              <span className="text-[12px] text-sb-white/70 font-mono">Tap square to finish</span>
+            </div>
 
             <button
               type="button"
               data-testid="cancel-recording-btn"
               onClick={handleResetToIdle}
-              className="text-caption text-sb-white/60 hover:text-sb-white"
+              className="text-caption text-sb-white/60 hover:text-sb-white transition-colors"
             >
               Cancel recording
             </button>
@@ -485,42 +511,35 @@ function CapturePageContent() {
 
         {/* STATE: TRANSCRIBING */}
         {state === 'transcribing' && (
-          <div className="flex flex-col items-center justify-center space-y-4 text-center animate-in fade-in">
-            <div className="w-12 h-12 rounded-full bg-sb-white/10 flex items-center justify-center animate-spin text-sb-white">
-              <Loader2 className="w-6 h-6" />
+          <div className="flex flex-col items-center justify-center space-y-5 text-center animate-in fade-in w-full py-8">
+            <div className="w-14 h-14 rounded-full bg-sb-white/10 flex items-center justify-center animate-spin text-sb-white border border-sb-white/20">
+              <Loader2 className="w-7 h-7" />
             </div>
-            <div className="space-y-1">
+            <div className="space-y-1.5">
               <h3 className="text-title-3 font-bold text-sb-white">
                 Transcribing & Normalising...
               </h3>
-              <p className="text-caption text-sb-white/70 font-mono">
-                Extracting action, spool, line number, and status
+              <p className="text-caption text-sb-white/70 font-mono max-w-[280px]">
+                Extracting action, object, location, and status parameters
               </p>
             </div>
-            <div className="w-48 h-1 bg-sb-white/20 rounded-full overflow-hidden">
-              <div className="h-full bg-sb-white w-1/2 animate-pulse" />
+            <div className="w-48 h-1.5 bg-sb-white/20 rounded-full overflow-hidden">
+              <div className="h-full bg-sb-white w-2/3 animate-pulse rounded-full" />
             </div>
           </div>
         )}
 
-        {/* STATE: CLARIFY */}
-        {state === 'clarify' && clarificationQuestion && (
-          <div className="w-full">
-            <ClarificationCard
-              question={clarificationQuestion}
-              onAnswer={handleClarificationAnswer}
-              onSkip={handleSkipClarification}
-            />
-          </div>
-        )}
-
-        {/* STATE: CONFIRM */}
-        {state === 'confirm' && (
-          <div className="w-full">
+        {/* STATE: CLARIFY OR CONFIRM (Continuous Unified Sequence) */}
+        {(state === 'clarify' || state === 'confirm') && (
+          <div className="w-full space-y-4">
             <ConfirmReportCard
               initialInfo={extractedInfo}
               rawText={rawText}
               isSubmitting={false}
+              audioUrl={audioUrl}
+              clarificationQuestion={state === 'clarify' ? clarificationQuestion : null}
+              onAnswerClarification={handleClarificationAnswer}
+              onSkipClarification={handleSkipClarification}
               onSubmit={handleFinalSubmit}
               onReRecord={handleResetToIdle}
             />
@@ -529,14 +548,16 @@ function CapturePageContent() {
 
         {/* STATE: SUBMITTING */}
         {state === 'submitting' && (
-          <div className="flex flex-col items-center justify-center space-y-4 text-center animate-in fade-in">
-            <div className="w-12 h-12 rounded-full border-4 border-sb-white/30 border-t-sb-white animate-spin" />
-            <h3 className="text-title-3 font-bold text-sb-white">
-              Submitting to Primavera P6...
-            </h3>
-            <p className="text-caption text-sb-white/70">
-              Matching schedule activity and updating planner queue
-            </p>
+          <div className="flex flex-col items-center justify-center space-y-4 text-center animate-in fade-in py-8">
+            <div className="w-14 h-14 rounded-full border-4 border-sb-white/30 border-t-sb-white animate-spin" />
+            <div className="space-y-1">
+              <h3 className="text-title-3 font-bold text-sb-white">
+                Submitting to Primavera P6...
+              </h3>
+              <p className="text-caption text-sb-white/70">
+                Matching schedule activity and routing to planner queue
+              </p>
+            </div>
           </div>
         )}
 
@@ -561,7 +582,7 @@ function CapturePageContent() {
                 Ref: {submittedEventId}
               </div>
               <p className="text-caption text-sb-ink-2 pt-2">
-                Your planner will verify this report against the P6 schedule baseline.
+                Your planner will verify this report against the P6 schedule baseline in the Review Workbench.
               </p>
             </div>
 
@@ -570,7 +591,7 @@ function CapturePageContent() {
                 type="button"
                 data-testid="capture-report-another-btn"
                 onClick={handleResetToIdle}
-                className="w-full py-3 rounded-full bg-sb-navy text-sb-white font-semibold text-callout hover:bg-sb-navy-pressed flex items-center justify-center gap-2 transition-all active:scale-[0.99]"
+                className="w-full py-3 rounded-full bg-sb-navy text-sb-white font-semibold text-callout hover:bg-sb-navy-pressed flex items-center justify-center gap-2 sb-press-spring cursor-pointer"
               >
                 <RotateCcw className="w-4 h-4" />
                 <span>Report Another Update</span>
@@ -580,7 +601,7 @@ function CapturePageContent() {
                 type="button"
                 data-testid="capture-done-btn"
                 onClick={() => router.push('/home')}
-                className="w-full py-2.5 rounded-full border border-sb-border text-sb-navy font-semibold text-caption hover:bg-sb-bg flex items-center justify-center gap-1.5 transition-colors"
+                className="w-full py-2.5 rounded-full border border-sb-border text-sb-navy font-semibold text-caption hover:bg-sb-bg flex items-center justify-center gap-1.5 sb-press-spring cursor-pointer"
               >
                 <Home className="w-4 h-4" />
                 <span>Done & Return Home</span>
@@ -616,9 +637,9 @@ function CapturePageContent() {
                 type="button"
                 data-testid="view-queued-reports-btn"
                 onClick={() => router.push('/reports?tab=Queued')}
-                className="w-full py-3 rounded-full bg-sb-navy text-sb-white font-semibold text-callout hover:bg-sb-navy-pressed flex items-center justify-center gap-2"
+                className="w-full py-3 rounded-full bg-sb-navy text-sb-white font-semibold text-callout hover:bg-sb-navy-pressed flex items-center justify-center gap-2 sb-press-spring cursor-pointer"
               >
-                <span>View Queued Reports in SU3</span>
+                <span>View Queued Reports in Reports</span>
                 <ChevronRight className="w-4 h-4" />
               </button>
 
@@ -626,14 +647,14 @@ function CapturePageContent() {
                 type="button"
                 data-testid="queued-done-btn"
                 onClick={() => router.push('/home')}
-                className="w-full py-2.5 rounded-full border border-sb-border text-sb-navy font-semibold text-caption hover:bg-sb-bg"
+                className="w-full py-2.5 rounded-full border border-sb-border text-sb-navy font-semibold text-caption hover:bg-sb-bg sb-press-spring cursor-pointer"
               >
                 Done
               </button>
             </div>
           </div>
         )}
-      </div>
+      </PageContainer>
 
       {/* 3. Bottom Safe Area Bar */}
       <div className="p-3 text-center text-[11px] text-sb-white/40 font-mono border-t border-sb-white/10 shrink-0">

@@ -35,7 +35,7 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({
       onClick={onClick}
       role={onClick ? 'button' : undefined}
       tabIndex={onClick ? 0 : undefined}
-      className={`relative w-full rounded-[20px] overflow-hidden bg-sb-white border border-sb-border shadow-e1 cursor-pointer transition-transform active:scale-[0.99] focus-visible:outline focus-visible:outline-2 focus-visible:outline-sb-navy ${className}`}
+      className={`relative w-full rounded-[20px] overflow-hidden bg-sb-white border border-sb-border shadow-e1 cursor-pointer sb-press-spring focus-visible:outline focus-visible:outline-2 focus-visible:outline-sb-navy ${className}`}
     >
       {/* 16:9 Hero Photo (Height ~168px) with Flat Scrim */}
       <div className="relative w-full h-[168px] bg-sb-navy">

@@ -10,11 +10,14 @@ import {
   BarChart2,
   Users,
   Calendar,
-  BookOpen,
+  Layers,
   User,
   Mic,
   Plus,
   MessageSquare,
+  Settings,
+  Download,
+  Shield,
 } from 'lucide-react';
 import { useAuthStore, UserRole } from '@/store/auth';
 import { IngestSheet } from '@/components/ingest/IngestSheet';
@@ -35,14 +38,20 @@ export const BottomNav: React.FC<BottomNavProps> = ({
   const role: UserRole = user?.role || 'supervisor';
   const [ingestSheetOpen, setIngestSheetOpen] = useState(false);
 
+  // Slot 1: Home/Overview
+  let slot1 = { label: 'Home', href: '/home', icon: Home };
+  if (role === 'admin') {
+    slot1 = { label: 'Users', href: '/admin/users', icon: Users };
+  }
+
   // Slot 2 configuration
   let slot2 = { label: 'Reports', href: '/reports', icon: FileText };
   if (role === 'planner') {
-    slot2 = { label: 'Workbench', href: '/workbench', icon: Briefcase };
+    slot2 = { label: 'Review', href: '/workbench', icon: Briefcase };
   } else if (role === 'pm') {
     slot2 = { label: 'Analytics', href: '/analytics', icon: BarChart2 };
   } else if (role === 'admin') {
-    slot2 = { label: 'Users', href: '/admin/users', icon: Users };
+    slot2 = { label: 'Projects', href: '/admin/projects', icon: Layers };
   }
 
   // Center button configuration
@@ -54,12 +63,12 @@ export const BottomNav: React.FC<BottomNavProps> = ({
   if (role === 'planner') {
     centerConfig = {
       label: 'Ingest',
-      href: '/ingest/excel',
+      href: '/ingest/xer',
       icon: Plus,
     };
   } else if (role === 'pm') {
     centerConfig = {
-      label: 'Ask',
+      label: 'Ask AI',
       href: '/ask',
       icon: MessageSquare,
     };
@@ -74,15 +83,23 @@ export const BottomNav: React.FC<BottomNavProps> = ({
   // Slot 4 configuration
   let slot4 = { label: 'Schedule', href: '/schedule', icon: Calendar };
   if (role === 'admin') {
-    slot4 = { label: 'Dictionary', href: '/admin/dictionary', icon: BookOpen };
+    slot4 = { label: 'Settings', href: '/settings', icon: Settings };
+  }
+
+  // Slot 5 configuration
+  let slot5 = { label: 'Profile', href: '/profile', icon: User };
+  if (role === 'planner') {
+    slot5 = { label: 'Export', href: '/export', icon: Download };
+  } else if (role === 'pm') {
+    slot5 = { label: 'Audit', href: '/audit', icon: Shield };
   }
 
   const navItems = [
-    { label: 'Home', href: '/home', icon: Home },
+    slot1,
     slot2,
     null, // Placeholder for center raised button
     slot4,
-    { label: 'Profile', href: '/profile', icon: User },
+    slot5,
   ];
 
   const CenterIcon = centerConfig.icon;
@@ -93,7 +110,7 @@ export const BottomNav: React.FC<BottomNavProps> = ({
       className={`fixed bottom-0 left-0 right-0 z-40 max-w-md mx-auto w-full bg-sb-white border-t border-sb-border shadow-e2 pb-safe ${className}`}
     >
       <div className="relative h-16 flex items-center justify-around px-2">
-        {navItems.map((item, index) => {
+        {navItems.map((item) => {
           if (!item) {
             // Raised 64px Navy Center Button
             return (
@@ -119,7 +136,11 @@ export const BottomNav: React.FC<BottomNavProps> = ({
             );
           }
 
-          const isActive = pathname === item.href;
+          const isActive =
+            item.href === '/home'
+              ? pathname === '/home'
+              : pathname === item.href || (item.href !== '/' && pathname.startsWith(item.href));
+          const isSecondary = item.label === 'Profile' || item.label === 'Settings';
           const Icon = item.icon;
 
           return (
@@ -128,11 +149,22 @@ export const BottomNav: React.FC<BottomNavProps> = ({
               href={item.href}
               data-testid={`${testId}-${item.label.toLowerCase()}`}
               className={`flex-1 flex flex-col items-center justify-center py-1 transition-colors ${
-                isActive ? 'text-sb-navy' : 'text-sb-ink-3 hover:text-sb-ink'
+                isActive
+                  ? 'text-sb-navy'
+                  : isSecondary
+                  ? 'text-sb-ink-3/80 hover:text-sb-navy'
+                  : 'text-sb-ink-3 hover:text-sb-ink'
               }`}
             >
-              <Icon className="w-6 h-6" strokeWidth={isActive ? 2 : 1.5} />
-              <span className={`text-[11px] mt-0.5 ${isActive ? 'font-semibold' : 'font-normal'}`}>
+              <Icon
+                className={`${isSecondary ? 'w-4 h-4' : 'w-5 h-5'}`}
+                strokeWidth={isActive ? 2 : 1.5}
+              />
+              <span
+                className={`mt-0.5 tracking-tight ${
+                  isSecondary ? 'text-[9px]' : 'text-[10px]'
+                } ${isActive ? 'font-bold text-sb-navy' : 'font-normal'}`}
+              >
                 {item.label}
               </span>
             </Link>

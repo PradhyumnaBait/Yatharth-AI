@@ -272,6 +272,12 @@ export const useEventsStore = create<EventsState>()(
     }),
     {
       name: 'schedbridge-events-store',
+      version: 2,
+      migrate: () => ({
+        events: generateSeedEvents('reference'),
+        lastApprovedAt: getInitialLastApprovedAt(),
+        previousStates: {},
+      }),
     }
   )
 );

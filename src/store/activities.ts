@@ -45,6 +45,10 @@ export const useActivitiesStore = create<ActivitiesState>()(
     }),
     {
       name: 'schedbridge-activities-store',
+      version: 2,
+      migrate: () => ({
+        activities: generateFullSchedule(),
+      }),
     }
   )
 );

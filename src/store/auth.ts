@@ -34,7 +34,7 @@ export const DEMO_USERS: Record<UserRole, UserProfile> = {
     employeeId: 'PLN-0107',
     role: 'planner',
     organization: 'Sterling Infra EPC',
-    avatarUrl: '/images/avatar-rahul.jpg',
+    avatarUrl: undefined, // Needs human to supply real photo of Meera Nair
     currentProjectId: 'kandla-panipat-p3',
   },
   pm: {
@@ -44,7 +44,7 @@ export const DEMO_USERS: Record<UserRole, UserProfile> = {
     employeeId: 'PM-0031',
     role: 'pm',
     organization: "Owner's Project Team",
-    avatarUrl: '/images/avatar-rahul.jpg',
+    avatarUrl: undefined, // Needs human to supply real photo of Arvind Deshmukh
     currentProjectId: 'kandla-panipat-p3',
   },
   admin: {
@@ -54,7 +54,7 @@ export const DEMO_USERS: Record<UserRole, UserProfile> = {
     employeeId: 'ADM-0002',
     role: 'admin',
     organization: 'Sterling Infra EPC',
-    avatarUrl: '/images/avatar-rahul.jpg',
+    avatarUrl: undefined, // Needs human to supply real photo of Sana Qureshi
     currentProjectId: 'kandla-panipat-p3',
   },
 };

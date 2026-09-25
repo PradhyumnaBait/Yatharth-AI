@@ -36,7 +36,7 @@ export const EventRow: React.FC<EventRowProps> = ({
       onClick={onClick}
       role={onClick ? 'button' : undefined}
       tabIndex={onClick ? 0 : undefined}
-      className={`w-full flex items-center justify-between py-3 px-1 transition-colors hover:bg-sb-white/60 active:bg-sb-navy-tint/50 rounded-[12px] cursor-pointer focus-visible:outline focus-visible:outline-2 focus-visible:outline-sb-navy ${className}`}
+      className={`w-full flex items-center justify-between py-3 px-1 transition-colors hover:bg-sb-white/60 active:bg-sb-navy-tint/50 rounded-[12px] cursor-pointer sb-press-spring focus-visible:outline focus-visible:outline-2 focus-visible:outline-sb-navy ${className}`}
     >
       <div className="flex items-center gap-3 min-w-0 pr-3">
         {/* 48px Thumbnail or Source Glyph on Navy Tint */}

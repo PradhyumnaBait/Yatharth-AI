@@ -32,7 +32,7 @@ export const KpiTile: React.FC<KpiTileProps> = ({
       onClick={onClick}
       data-testid={testId}
       aria-label={`${number} ${label}`}
-      className={`relative w-full p-4 rounded-[16px] bg-sb-white border border-sb-border shadow-e1 text-left flex flex-col justify-between transition-transform active:scale-[0.98] focus-visible:outline focus-visible:outline-2 focus-visible:outline-sb-navy focus-visible:outline-offset-2 ${className}`}
+      className={`relative w-full p-4 rounded-[16px] bg-sb-white border border-sb-border shadow-e1 text-left flex flex-col justify-between sb-press-spring cursor-pointer focus-visible:outline focus-visible:outline-2 focus-visible:outline-sb-navy focus-visible:outline-offset-2 ${className}`}
     >
       <div className="flex items-start justify-between w-full">
         <div className="text-num-l font-semibold text-sb-navy tracking-tight" aria-live="polite">

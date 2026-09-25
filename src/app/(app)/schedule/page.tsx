@@ -3,6 +3,7 @@
 import React, { useState, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { PageHeader } from '@/components/shell/PageHeader';
+import { PageContainer } from '@/components/shell/PageContainer';
 import { StatusPill } from '@/components/ui/StatusPill';
 import { useActivitiesStore } from '@/store/activities';
 import { useAuthStore } from '@/store/auth';
@@ -18,7 +19,7 @@ import {
 } from 'lucide-react';
 import { Activity } from '@/services/types';
 
-export default function SchedulePage() {
+function SchedulePageContent() {
   const router = useRouter();
   const { user } = useAuthStore();
   const activities = useActivitiesStore((s) => s.activities);
@@ -70,7 +71,13 @@ export default function SchedulePage() {
   }, [filteredActivities]);
 
   return (
-    <div className="flex flex-col min-h-full bg-sb-bg pb-28" data-testid="schedule-screen-s6">
+    <PageContainer
+      maxWidth="container"
+      withGutter={false}
+      withVerticalRhythm={false}
+      className="flex flex-col min-h-full bg-sb-bg pb-28"
+      data-testid="schedule-screen-s6"
+    >
       <span data-testid="stub-s6" className="sr-only">S6</span>
       {/* 1. Header with Data Date & Search icon */}
       <PageHeader
@@ -380,6 +387,42 @@ export default function SchedulePage() {
           </div>
         </div>
       )}
+    </PageContainer>
+  );
+}
+
+import { Skeleton } from '@/components/ui/Skeleton';
+
+function ScheduleSkeleton() {
+  return (
+    <div className="flex flex-col min-h-full bg-sb-bg pb-28 space-y-3" data-testid="schedule-skeleton">
+      <div className="h-14 bg-sb-white border-b border-sb-border px-4 flex items-center justify-between">
+        <Skeleton variant="text" width={140} height={20} />
+        <Skeleton variant="avatar" width={32} height={32} />
+      </div>
+      <div className="px-4 space-y-3">
+        <div className="flex gap-2">
+          <Skeleton variant="pill" width={90} height={32} />
+          <Skeleton variant="pill" width={90} height={32} />
+        </div>
+        <div className="flex gap-2">
+          <Skeleton variant="pill" width={100} height={28} />
+          <Skeleton variant="pill" width={100} height={28} />
+          <Skeleton variant="pill" width={120} height={28} />
+        </div>
+        <div className="space-y-3 pt-2">
+          <Skeleton variant="rect" height={160} className="rounded-2xl w-full" />
+          <Skeleton variant="rect" height={160} className="rounded-2xl w-full" />
+        </div>
+      </div>
     </div>
+  );
+}
+
+export default function SchedulePage() {
+  return (
+    <React.Suspense fallback={<ScheduleSkeleton />}>
+      <SchedulePageContent />
+    </React.Suspense>
   );
 }

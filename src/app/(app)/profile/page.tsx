@@ -36,6 +36,13 @@ export default function ProfilePage() {
   const [switchUserSheetOpen, setSwitchUserSheetOpen] = useState(false);
   const [switchProjectSheetOpen, setSwitchProjectSheetOpen] = useState(false);
   const [signOutDialogOpen, setSignOutDialogOpen] = useState(false);
+  const [showDevControls, setShowDevControls] = useState(false);
+
+  React.useEffect(() => {
+    const isDevEnv = process.env.NEXT_PUBLIC_SHOW_DEV_CONTROLS === 'true';
+    const isDevQuery = typeof window !== 'undefined' && (window.location.search.includes('dev=1') || window.location.search.includes('dev=true'));
+    setShowDevControls(isDevEnv || isDevQuery);
+  }, []);
 
   // Role-specific stats
   const getRoleStats = () => {
@@ -183,29 +190,35 @@ export default function ProfilePage() {
           </div>
         </div>
 
-        {/* Developer Demo Section */}
-        <div className="bg-white rounded-card border border-sb-border shadow-e1 divide-y divide-sb-border-subtle overflow-hidden">
-          <div className="px-3.5 py-2 bg-sb-bg-subtle text-[11px] font-bold uppercase text-sb-text-subtle tracking-wider">
-            {t('profile.developerControls')}
-          </div>
-
-          <div
-            data-testid="profile-switch-demo-user-btn"
-            onClick={() => setSwitchUserSheetOpen(true)}
-            className="flex items-center justify-between p-3.5 hover:bg-sb-bg cursor-pointer transition-colors"
-          >
-            <div className="flex items-center gap-3">
-              <ArrowRightLeft className="w-4 h-4 text-sb-navy" />
-              <div>
-                <span className="text-caption font-medium text-sb-ink block">{t('profile.switchDemoUser')}</span>
-                <span className="text-[11px] text-sb-text-subtle">
-                  {t('profile.switchDemoUserSub')}
-                </span>
-              </div>
+        {/* Developer Demo Section (Gated behind build-time / env flag) */}
+        {showDevControls && (
+          <div className="bg-white rounded-card border border-amber-200 shadow-e1 divide-y divide-sb-border-subtle overflow-hidden">
+            <div className="px-3.5 py-2 bg-amber-50 text-[11px] font-bold uppercase text-amber-800 tracking-wider flex items-center justify-between">
+              <span>{t('profile.developerControls')}</span>
+              <span className="text-[9px] bg-amber-200/80 text-amber-900 px-1.5 py-0.2 rounded font-mono">DEV MODE</span>
             </div>
-            <ChevronRight className="w-4 h-4 text-sb-text-subtle" />
-          </div>
 
+            <div
+              data-testid="profile-switch-demo-user-btn"
+              onClick={() => setSwitchUserSheetOpen(true)}
+              className="flex items-center justify-between p-3.5 hover:bg-sb-bg cursor-pointer transition-colors"
+            >
+              <div className="flex items-center gap-3">
+                <ArrowRightLeft className="w-4 h-4 text-sb-navy" />
+                <div>
+                  <span className="text-caption font-medium text-sb-ink block">{t('profile.switchDemoUser')}</span>
+                  <span className="text-[11px] text-sb-text-subtle">
+                    {t('profile.switchDemoUserSub')}
+                  </span>
+                </div>
+              </div>
+              <ChevronRight className="w-4 h-4 text-sb-text-subtle" />
+            </div>
+          </div>
+        )}
+
+        {/* Account / Session Action */}
+        <div className="bg-white rounded-card border border-sb-border shadow-e1 overflow-hidden">
           <div
             data-testid="profile-sign-out-btn"
             onClick={() => setSignOutDialogOpen(true)}

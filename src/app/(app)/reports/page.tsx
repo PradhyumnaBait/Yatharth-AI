@@ -3,8 +3,11 @@
 import React, { useState, useMemo } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { PageHeader } from '@/components/shell/PageHeader';
+import { PageContainer } from '@/components/shell/PageContainer';
 import { UnderlineTabs, TabItem } from '@/components/ui/UnderlineTabs';
 import { StatusPill } from '@/components/ui/StatusPill';
+import { ConfidenceBadge } from '@/components/domain/ConfidenceBadge';
+import { KpiTile } from '@/components/ui/KpiTile';
 import { Sheet } from '@/components/ui/Sheet';
 import { Toast } from '@/components/ui/Toast';
 import { useEventsStore } from '@/store/events';
@@ -25,6 +28,11 @@ import {
   FileText,
   AlertCircle,
   Clock,
+  Sparkles,
+  ChevronDown,
+  ChevronUp,
+  CheckCircle2,
+  ArrowRight,
 } from 'lucide-react';
 import { FieldEvent } from '@/services/types';
 import { useTranslation } from '@/i18n/useTranslation';
@@ -50,12 +58,16 @@ function ReportsPageContent() {
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [filterSheetOpen, setFilterSheetOpen] = useState(false);
   const [selectedStatus, setSelectedStatus] = useState<string>('All');
+  const [showAllTodayReports, setShowAllTodayReports] = useState(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
   // Events requiring supervisor reply
   const replyNeededEvents = useMemo(() => {
     return events.filter((e) => e.status === 'Reply needed');
   }, [events]);
+
+  const verifiedCount = events.filter((e) => e.status === 'Verified').length;
+  const reviewCount = events.filter((e) => e.status === 'Review' || e.queueTier === 'Review').length;
 
   // Tab items with dynamic counts
   const reportTabs: TabItem[] = [
@@ -77,6 +89,9 @@ function ReportsPageContent() {
       return true;
     });
   }, [events, crewFilter, user?.name, selectedStatus]);
+
+  // Capped visible reports for progressive disclosure
+  const visibleTodayReports = showAllTodayReports ? displayedEvents : displayedEvents.slice(0, 4);
 
   const handleRefresh = () => {
     setIsRefreshing(true);
@@ -119,12 +134,18 @@ function ReportsPageContent() {
   };
 
   return (
-    <div className="flex flex-col min-h-full bg-sb-bg pb-24" data-testid="reports-screen-su3">
+    <PageContainer
+      maxWidth="container"
+      withGutter={false}
+      withVerticalRhythm={false}
+      className="flex flex-col min-h-full bg-sb-bg pb-24 space-y-3"
+      data-testid="reports-screen-su3"
+    >
       {/* 1. Header */}
       <PageHeader
         variant="back"
         title={t('reports.title')}
-        subtitle="Supervisor Execution Log"
+        subtitle="Supervisor Field Execution Log"
         rightAction={
           <button
             type="button"
@@ -138,9 +159,70 @@ function ReportsPageContent() {
         }
       />
 
-      {/* 2. Priority Reply Needed Banner if planner asked a question */}
+      {/* 1. SUMMARY: Capped 3 Summary KPI Tiles */}
+      <section className="px-4">
+        <div className="grid grid-cols-3 gap-2" data-testid="reports-kpi-summary">
+          <KpiTile
+            number={String(verifiedCount).padStart(2, '0')}
+            label="Verified"
+            statusColor="verified"
+            icon={<CheckCircle2 className="w-3.5 h-3.5 text-sb-verified" />}
+            onClick={() => setSelectedStatus('Verified')}
+            data-testid="reports-kpi-verified"
+          />
+          <KpiTile
+            number={String(reviewCount).padStart(2, '0')}
+            label="In Review"
+            statusColor="review"
+            icon={<Clock className="w-3.5 h-3.5 text-sb-review" />}
+            onClick={() => setSelectedStatus('Review')}
+            data-testid="reports-kpi-review"
+          />
+          <KpiTile
+            number={String(queuedReports.length).padStart(2, '0')}
+            label="Queued"
+            statusColor={queuedReports.length > 0 ? 'review' : 'navy'}
+            icon={<CloudUpload className="w-3.5 h-3.5 text-sb-navy" />}
+            onClick={() => setActiveTab('queued')}
+            data-testid="reports-kpi-queued"
+          />
+        </div>
+      </section>
+
+      {/* 2. KEY INSIGHT CARD */}
+      <section className="px-4">
+        <div
+          data-testid="reports-key-insight-card"
+          className="p-3.5 rounded-2xl bg-sb-navy-tint/60 border border-sb-navy/20 flex items-start justify-between gap-3 shadow-2xs"
+        >
+          <div className="flex items-start gap-2.5 min-w-0">
+            <div className="w-7 h-7 rounded-lg bg-sb-navy text-sb-white flex items-center justify-center shrink-0 mt-0.5 shadow-xs">
+              <Sparkles className="w-3.5 h-3.5 text-amber-300" />
+            </div>
+            <div className="min-w-0 space-y-0.5">
+              <div className="text-[11px] font-mono font-bold uppercase tracking-wider text-sb-navy">
+                Field Velocity & AI Confidence
+              </div>
+              <p className="text-caption text-sb-ink font-medium leading-relaxed">
+                47 verified field updates across 4 pipeline crews today. 94% average AI matching confidence against P6 baseline.
+              </p>
+            </div>
+          </div>
+
+          <button
+            type="button"
+            onClick={() => router.push('/capture')}
+            className="text-[11px] font-bold text-sb-navy hover:underline shrink-0 flex items-center gap-1 mt-1 font-mono"
+          >
+            <span>+ Capture</span>
+            <ArrowRight className="w-3 h-3" />
+          </button>
+        </div>
+      </section>
+
+      {/* Priority Reply Needed Banner */}
       {replyNeededEvents.length > 0 && (
-        <div className="px-4 pt-3">
+        <div className="px-4">
           <div
             data-testid="planner-reply-banner"
             onClick={() => router.push(`/event/${replyNeededEvents[0].id}`)}
@@ -169,8 +251,8 @@ function ReportsPageContent() {
         </div>
       )}
 
-      {/* 3. Mine | All Crews Segmented Switcher & Refresh Bar */}
-      <div className="px-4 pt-3 flex items-center justify-between gap-3">
+      {/* Mine | All Crews Segmented Switcher & Refresh Bar */}
+      <div className="px-4 flex items-center justify-between gap-3">
         <div className="flex items-center bg-sb-white border border-sb-border rounded-xl p-1 shadow-sm">
           <button
             type="button"
@@ -205,8 +287,8 @@ function ReportsPageContent() {
         </button>
       </div>
 
-      {/* 4. Underline Tabs (Today · Drafts · Queued · History) */}
-      <div className="px-4 pt-2 bg-sb-bg">
+      {/* Underline Tabs */}
+      <div className="px-4 pt-1 bg-sb-bg">
         <UnderlineTabs
           tabs={reportTabs}
           activeId={activeTab}
@@ -214,8 +296,8 @@ function ReportsPageContent() {
         />
       </div>
 
-      {/* 5. Tab Body Content */}
-      <div className="p-4 space-y-3">
+      {/* 3. OPTIONAL DETAILS & 4. DRILL-DOWN: Tab Content */}
+      <div className="p-4 space-y-3 pt-0">
         {/* TODAY TAB */}
         {activeTab.toLowerCase() === 'today' && (
           <div className="space-y-2.5" data-testid="reports-today-list">
@@ -235,37 +317,54 @@ function ReportsPageContent() {
                 </button>
               </div>
             ) : (
-              displayedEvents.map((evt) => (
-                <div
-                  key={evt.id}
-                  data-testid={`report-row-${evt.id}`}
-                  onClick={() => router.push(`/event/${evt.id}`)}
-                  className="bg-sb-white rounded-xl p-3.5 border border-sb-border shadow-sm hover:border-sb-navy/50 cursor-pointer transition-colors flex items-start justify-between gap-3 group"
-                >
-                  <div className="space-y-1 min-w-0 flex-1">
-                    <div className="flex items-center gap-2">
-                      <span className="font-mono text-[11px] font-bold text-sb-navy">{evt.id}</span>
-                      <span className="text-[11px] text-sb-ink-3 font-mono">· {evt.timestamp}</span>
-                      <StatusPill status={evt.status} />
+              <>
+                {visibleTodayReports.map((evt) => (
+                  <div
+                    key={evt.id}
+                    data-testid={`report-row-${evt.id}`}
+                    onClick={() => router.push(`/event/${evt.id}`)}
+                    className="bg-sb-white rounded-xl p-3.5 border border-sb-border shadow-sm hover:border-sb-navy/50 cursor-pointer transition-colors flex items-start justify-between gap-3 group"
+                  >
+                    <div className="space-y-1 min-w-0 flex-1">
+                      <div className="flex items-center gap-2">
+                        <span className="font-mono text-[11px] font-bold text-sb-navy">{evt.id}</span>
+                        <span className="text-[11px] text-sb-ink-3 font-mono">· {evt.timestamp}</span>
+                        <StatusPill status={evt.status} />
+                      </div>
+
+                      <div className="text-caption text-sb-ink font-medium line-clamp-1 group-hover:text-sb-navy">
+                        &ldquo;{evt.rawText}&rdquo;
+                      </div>
+
+                      <div className="flex items-center gap-3 text-[11px] text-sb-ink-3">
+                        <span>{evt.authorName}</span>
+                        {evt.confidence && (
+                          <ConfidenceBadge confidence={evt.confidence} size="xs" showLabel={true} />
+                        )}
+                      </div>
                     </div>
 
-                    <div className="text-caption text-sb-ink font-medium line-clamp-1 group-hover:text-sb-navy">
-                      &ldquo;{evt.rawText}&rdquo;
-                    </div>
-
-                    <div className="flex items-center gap-3 text-[11px] text-sb-ink-3">
-                      <span>{evt.authorName}</span>
-                      {evt.confidence && (
-                        <span className="text-sb-navy font-semibold font-mono">
-                          {evt.confidence}% match
-                        </span>
-                      )}
-                    </div>
+                    <ChevronRight className="w-5 h-5 text-sb-ink-3 group-hover:text-sb-navy group-hover:translate-x-0.5 transition-all mt-1" />
                   </div>
+                ))}
 
-                  <ChevronRight className="w-5 h-5 text-sb-ink-3 group-hover:text-sb-navy group-hover:translate-x-0.5 transition-all mt-1" />
-                </div>
-              ))
+                {/* Progressive disclosure toggle */}
+                {displayedEvents.length > 4 && (
+                  <button
+                    type="button"
+                    data-testid="toggle-reports-count-btn"
+                    onClick={() => setShowAllTodayReports(!showAllTodayReports)}
+                    className="w-full py-2.5 bg-sb-white rounded-xl border border-sb-border hover:border-sb-navy/30 text-caption font-bold text-sb-navy flex items-center justify-center gap-1.5 shadow-2xs transition-colors"
+                  >
+                    <span>
+                      {showAllTodayReports
+                        ? 'Show Top 4 Reports Only'
+                        : `View All Today's Reports (${displayedEvents.length})`}
+                    </span>
+                    {showAllTodayReports ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+                  </button>
+                )}
+              </>
             )}
           </div>
         )}
@@ -408,13 +507,45 @@ function ReportsPageContent() {
           onClose={() => setToastMessage(null)}
         />
       )}
+    </PageContainer>
+  );
+}
+
+import { Skeleton } from '@/components/ui/Skeleton';
+
+function ReportsSkeleton() {
+  return (
+    <div className="flex flex-col min-h-full bg-sb-bg pb-24 space-y-3" data-testid="reports-skeleton">
+      <div className="h-14 bg-sb-white border-b border-sb-border px-4 flex items-center justify-between">
+        <Skeleton variant="text" width={120} height={20} />
+        <Skeleton variant="avatar" width={32} height={32} />
+      </div>
+      <div className="px-4 space-y-3">
+        <div className="grid grid-cols-3 gap-2">
+          <Skeleton variant="card" height={80} className="rounded-2xl" />
+          <Skeleton variant="card" height={80} className="rounded-2xl" />
+          <Skeleton variant="card" height={80} className="rounded-2xl" />
+        </div>
+        <Skeleton variant="rect" height={70} className="rounded-2xl w-full" />
+        <div className="flex gap-4 border-b border-sb-border pb-2 pt-2">
+          <Skeleton variant="pill" width={60} height={24} />
+          <Skeleton variant="pill" width={60} height={24} />
+          <Skeleton variant="pill" width={60} height={24} />
+          <Skeleton variant="pill" width={60} height={24} />
+        </div>
+        <div className="space-y-2.5 pt-1">
+          <Skeleton variant="row" height={80} className="rounded-xl" />
+          <Skeleton variant="row" height={80} className="rounded-xl" />
+          <Skeleton variant="row" height={80} className="rounded-xl" />
+        </div>
+      </div>
     </div>
   );
 }
 
 export default function ReportsPage() {
   return (
-    <React.Suspense fallback={<div className="min-h-full bg-sb-bg" />}>
+    <React.Suspense fallback={<ReportsSkeleton />}>
       <ReportsPageContent />
     </React.Suspense>
   );

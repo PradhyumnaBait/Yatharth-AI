@@ -54,6 +54,15 @@ export const useProjectStore = create<ProjectState>()(
     }),
     {
       name: 'schedbridge-project-store',
+      version: 2,
+      migrate: () => ({
+        projects: FIXTURE_PROJECTS,
+        activeProjectId: 'kandla-panipat-p3',
+        phases: FIXTURE_PHASES,
+        teams: FIXTURE_TEAMS,
+        delayCauses: FIXTURE_DELAY_CAUSES,
+        memoryInsights: FIXTURE_MEMORY_INSIGHTS,
+      }),
     }
   )
 );
